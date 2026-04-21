@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Icon from "@/components/ui/icon";
+import FirstPersonGame from "@/components/FirstPersonGame";
 
 type Section = "menu" | "play" | "shop" | "market" | "inventory" | "cases" | "rating" | "settings" | "faq" | "collection" | "match";
 
@@ -271,6 +272,23 @@ export default function Index() {
   const rank = getRank(playerXP);
   const nextRank = getNextRank(playerXP);
   const xpProgress = nextRank ? ((playerXP - rank.min) / (nextRank.min - rank.min)) * 100 : 100;
+
+  const handleKill = useCallback((name: string) => {
+    setMatchScore(s => ({ ...s, me: s.me + 1 }));
+    setMatchKills(k => k + 1);
+    setMatchLog(l => [...l, { text: `☠ ${name} убит! +1 фраг`, color: "#00f5ff", id: Date.now() }]);
+  }, []);
+
+  const handleHit = useCallback((dmg: number) => {
+    setMatchHealth(h => Math.max(0, h - dmg));
+    setMatchLog(l => [...l, { text: `Получено ${dmg} урона!`, color: "#ff4444", id: Date.now() }]);
+  }, []);
+
+  const handleDeath = useCallback(() => {
+    setMatchAlive(false);
+    setMatchScore(s => ({ ...s, bots: s.bots + 1 }));
+    setMatchLog(l => [...l, { text: "☠ Вы убиты!", color: "#ff4444", id: Date.now() }]);
+  }, []);
 
   const navigate = (s: Section) => {
     if (s === section) return;
@@ -1452,11 +1470,29 @@ export default function Index() {
         {/* ===== MATCH ===== */}
         {section === "match" && (
           <div className="relative w-full" style={{ minHeight: "calc(100vh - 4rem)" }}>
-            {/* Background */}
-            <div className="absolute inset-0 overflow-hidden">
-              <img src={MATCH_HUD_IMAGE} alt="Match" className="w-full h-full object-cover" />
-              <div className="absolute inset-0" style={{ background: "rgba(7,7,15,0.6)" }} />
-            </div>
+            {/* ── 3D FIRST PERSON CANVAS (always rendered behind HUD) ── */}
+            {matchTab === "game" && (
+              <div className="absolute inset-0 z-0">
+                <FirstPersonGame
+                  mapId={selectedMap ?? 1}
+                  botLevel={selectedBot ?? "experienced"}
+                  weaponSkinUrl={weaponSkins[selectedWeaponSkin].img}
+                  onKill={handleKill}
+                  onHit={handleHit}
+                  onDeath={handleDeath}
+                  score={matchScore}
+                  health={matchHealth}
+                  ammo={matchAmmo}
+                />
+              </div>
+            )}
+            {/* Fallback bg for non-game tabs */}
+            {matchTab !== "game" && (
+              <div className="absolute inset-0 overflow-hidden">
+                <img src={MATCH_HUD_IMAGE} alt="Match" className="w-full h-full object-cover" />
+                <div className="absolute inset-0" style={{ background: "rgba(7,7,15,0.75)" }} />
+              </div>
+            )}
 
             {/* ── HUD TOP ── */}
             <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-3 py-2"
@@ -1514,184 +1550,83 @@ export default function Index() {
               ))}
             </div>
 
-            {/* ── TAB: GAME ── */}
+            {/* ── TAB: GAME — overlay HUD поверх 3D ── */}
             {matchTab === "game" && (<>
-              {/* Kill feed */}
-              <div className="absolute top-28 right-3 z-10 space-y-1 max-w-[200px]">
+              {/* Kill feed top-right */}
+              <div className="absolute top-28 right-3 z-30 space-y-1 max-w-[190px] pointer-events-none">
                 {matchLog.slice(-6).map(log => (
-                  <div key={log.id} className="text-[11px] font-rajdhani font-bold px-2 py-1 rounded"
-                    style={{ background: "rgba(0,0,0,0.7)", color: log.color, border: `1px solid ${log.color}25` }}>
+                  <div key={log.id} className="text-[11px] font-rajdhani font-bold px-2 py-1 rounded animate-slide-up"
+                    style={{ background: "rgba(0,0,0,0.75)", color: log.color, border: `1px solid ${log.color}20` }}>
                     {log.text}
                   </div>
                 ))}
               </div>
 
-              {/* Crosshair */}
-              <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
-                <div className="relative w-8 h-8">
-                  <div className="absolute top-0 left-1/2 w-0.5 h-3 -translate-x-1/2" style={{ background: "rgba(0,245,255,0.85)" }} />
-                  <div className="absolute bottom-0 left-1/2 w-0.5 h-3 -translate-x-1/2" style={{ background: "rgba(0,245,255,0.85)" }} />
-                  <div className="absolute left-0 top-1/2 h-0.5 w-3 -translate-y-1/2" style={{ background: "rgba(0,245,255,0.85)" }} />
-                  <div className="absolute right-0 top-1/2 h-0.5 w-3 -translate-y-1/2" style={{ background: "rgba(0,245,255,0.85)" }} />
-                  <div className="absolute inset-0 m-auto w-1 h-1 rounded-full" style={{ background: "rgba(0,245,255,1)" }} />
+              {/* Bottom HUD strip */}
+              <div className="absolute bottom-4 left-0 right-0 z-30 flex items-end justify-between px-4 pointer-events-none">
+                {/* HP + Armor */}
+                <div className="space-y-1.5 pointer-events-auto">
+                  <div className="flex items-center gap-2">
+                    <Icon name="Heart" size={13} style={{ color: "#ff4444" }} />
+                    <div className="w-28 h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+                      <div className="h-full rounded-full transition-all"
+                        style={{ width: `${matchHealth}%`, background: matchHealth > 50 ? "#39ff14" : matchHealth > 25 ? "#ffd700" : "#ff4444" }} />
+                    </div>
+                    <span className="font-oswald text-sm font-bold text-white">{matchHealth}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Icon name="Shield" size={13} style={{ color: "#4d9fff" }} />
+                    <div className="w-28 h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+                      <div className="h-full rounded-full" style={{ width: "65%", background: "#4d9fff" }} />
+                    </div>
+                    <span className="font-oswald text-sm font-bold text-white">65</span>
+                  </div>
+                  {/* Quickbar */}
+                  <div className="flex gap-1.5 mt-2 pointer-events-auto">
+                    <button className="px-3 py-1.5 rounded text-xs font-oswald tracking-wide uppercase"
+                      style={{ background: "rgba(57,255,20,0.12)", border: "1px solid rgba(57,255,20,0.25)", color: "#39ff14" }}
+                      onClick={() => {
+                        const heal = Math.floor(Math.random() * 20 + 15);
+                        setMatchHealth(h => Math.min(100, h + heal));
+                        setMatchLog(l => [...l, { text: `💊 +${heal} HP`, color: "#39ff14", id: Date.now() }]);
+                      }}>E Аптечка</button>
+                    <button className="px-3 py-1.5 rounded text-xs font-oswald tracking-wide uppercase"
+                      style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.55)" }}
+                      onClick={() => {
+                        setMatchAmmo(a => ({ current: 30, reserve: Math.max(0, a.reserve - 30) }));
+                        setMatchLog(l => [...l, { text: "🔄 Перезарядка", color: "#ffd700", id: Date.now() }]);
+                      }}>R Reload</button>
+                  </div>
+                </div>
+
+                {/* Weapon + ammo */}
+                <div className="text-right pointer-events-none">
+                  <div className="h-10 w-24 rounded overflow-hidden mb-1 ml-auto"
+                    style={{ border: `1px solid ${rarityColor[weaponSkins[selectedWeaponSkin].rarity]}30` }}>
+                    <img src={weaponSkins[selectedWeaponSkin].img} alt="weapon" className="w-full h-full object-cover" />
+                  </div>
+                  <div className="font-oswald text-2xl font-black text-white">
+                    {matchAmmo.current}
+                    <span className="text-xs font-normal ml-1" style={{ color: "rgba(255,255,255,0.35)" }}>/ {matchAmmo.reserve}</span>
+                  </div>
+                  <div className="text-[9px] font-oswald tracking-widest" style={{ color: rarityColor[weaponSkins[selectedWeaponSkin].rarity] }}>
+                    {weaponSkins[selectedWeaponSkin].name} · ЛКМ — стрелять
+                  </div>
                 </div>
               </div>
 
-              {/* HUD BOTTOM */}
-              <div className="absolute bottom-4 left-0 right-0 z-20 px-3">
-                {/* Health + armor */}
-                <div className="flex items-end justify-between mb-3">
-                  <div className="space-y-1.5">
-                    <div className="flex items-center gap-2">
-                      <Icon name="Heart" size={13} style={{ color: "#ff4444" }} />
-                      <div className="w-28 h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
-                        <div className="h-full rounded-full transition-all duration-300"
-                          style={{ width: `${matchHealth}%`, background: matchHealth > 50 ? "#39ff14" : matchHealth > 25 ? "#ffd700" : "#ff4444" }} />
-                      </div>
-                      <span className="font-oswald text-sm font-bold text-white">{matchHealth}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Icon name="Shield" size={13} style={{ color: "#4d9fff" }} />
-                      <div className="w-28 h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
-                        <div className="h-full rounded-full" style={{ width: "65%", background: "#4d9fff" }} />
-                      </div>
-                      <span className="font-oswald text-sm font-bold text-white">65</span>
-                    </div>
-                  </div>
-
-                  {/* Minimap — interactive */}
-                  <div className="w-32 h-32 rounded-lg overflow-hidden relative"
-                    style={{ border: "1px solid rgba(0,245,255,0.25)", background: "rgba(0,0,0,0.75)" }}>
-                    {/* Grid */}
-                    <div className="absolute inset-0 grid-bg opacity-30" />
-                    <div className="text-[8px] font-oswald tracking-widest absolute top-1 left-1"
-                      style={{ color: "rgba(0,245,255,0.4)" }}>КАРТА</div>
-                    {/* Player */}
-                    <div className="absolute w-2.5 h-2.5 rounded-full z-10 transition-all duration-300"
-                      style={{ background: "var(--neon-cyan)", boxShadow: "0 0 6px var(--neon-cyan)",
-                        left: `${playerPos.x}%`, top: `${playerPos.y}%`, transform: "translate(-50%,-50%)" }} />
-                    {/* Bots */}
-                    {bots.filter(b => b.hp > 0).map(b => (
-                      <div key={b.id} className="absolute w-2 h-2 rounded-full transition-all duration-500"
-                        style={{ background: b.color, boxShadow: `0 0 4px ${b.color}`,
-                          left: `${b.x}%`, top: `${b.y}%`, transform: "translate(-50%,-50%)" }} />
-                    ))}
-                    {/* WASD controls ON minimap */}
-                    <div className="absolute bottom-1 right-1 flex flex-col items-center gap-0.5">
-                      <button onClick={() => movePlayer("N")}
-                        className="w-5 h-5 rounded text-[9px] font-bold flex items-center justify-center"
-                        style={{ background: playerDir==="N" ? "rgba(0,245,255,0.4)" : "rgba(0,0,0,0.6)", border: "1px solid rgba(0,245,255,0.2)", color: "var(--neon-cyan)" }}>W</button>
-                      <div className="flex gap-0.5">
-                        <button onClick={() => movePlayer("W")}
-                          className="w-5 h-5 rounded text-[9px] font-bold flex items-center justify-center"
-                          style={{ background: playerDir==="W" ? "rgba(0,245,255,0.4)" : "rgba(0,0,0,0.6)", border: "1px solid rgba(0,245,255,0.2)", color: "var(--neon-cyan)" }}>A</button>
-                        <button onClick={() => movePlayer("S")}
-                          className="w-5 h-5 rounded text-[9px] font-bold flex items-center justify-center"
-                          style={{ background: playerDir==="S" ? "rgba(0,245,255,0.4)" : "rgba(0,0,0,0.6)", border: "1px solid rgba(0,245,255,0.2)", color: "var(--neon-cyan)" }}>S</button>
-                        <button onClick={() => movePlayer("E")}
-                          className="w-5 h-5 rounded text-[9px] font-bold flex items-center justify-center"
-                          style={{ background: playerDir==="E" ? "rgba(0,245,255,0.4)" : "rgba(0,0,0,0.6)", border: "1px solid rgba(0,245,255,0.2)", color: "var(--neon-cyan)" }}>D</button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Weapon skin */}
-                  <div className="text-right">
-                    <div className="h-10 w-24 rounded overflow-hidden mb-1 ml-auto"
-                      style={{ border: `1px solid ${rarityColor[weaponSkins[selectedWeaponSkin].rarity]}30` }}>
-                      <img src={weaponSkins[selectedWeaponSkin].img} alt="weapon" className="w-full h-full object-cover" />
-                    </div>
-                    <div className="font-oswald text-xl font-black text-white">
-                      {matchAmmo.current}
-                      <span className="text-xs font-normal ml-1" style={{ color: "rgba(255,255,255,0.35)" }}>/ {matchAmmo.reserve}</span>
-                    </div>
-                    <div className="text-[9px] font-oswald tracking-widest" style={{ color: rarityColor[weaponSkins[selectedWeaponSkin].rarity] }}>
-                      {weaponSkins[selectedWeaponSkin].name}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Action buttons */}
-                <div className="flex gap-2 justify-center flex-wrap">
-                  <button
-                    className="px-5 py-2.5 rounded-xl font-oswald tracking-widest uppercase text-sm font-bold transition-all active:scale-95"
-                    style={{ background: "rgba(0,245,255,0.18)", border: "1px solid rgba(0,245,255,0.4)", color: "var(--neon-cyan)", boxShadow: "0 0 12px rgba(0,245,255,0.15)" }}
-                    onClick={() => {
-                      if (matchAmmo.current === 0) {
-                        setMatchLog(l => [...l, { text: "Нет патронов! Перезарядись", color: "#ffd700", id: Date.now() }]);
-                        return;
-                      }
-                      const botLevel = BOT_LEVELS.find(bl => bl.id === selectedBot);
-                      const myAcc = 0.65;
-                      const killed = Math.random() < myAcc;
-                      const id = Date.now();
-                      if (killed) {
-                        const target = bots.find(b => b.hp > 0);
-                        if (target) {
-                          const dmgToBots = Math.floor(Math.random() * 35 + 20);
-                          const newHp = target.hp - dmgToBots;
-                          setBots(bs => bs.map(b => b.id === target.id ? { ...b, hp: Math.max(0, newHp), state: "chase" } : b));
-                          if (newHp <= 0) {
-                            setMatchScore(s => ({ ...s, me: s.me + 1 }));
-                            setMatchKills(k => k + 1);
-                            setMatchLog(l => [...l, { text: `☠ ${target.name} убит! +1 фраг`, color: "#00f5ff", id }]);
-                          } else {
-                            setMatchLog(l => [...l, { text: `Попал в ${target.name} −${dmgToBots} HP`, color: "#00f5ff", id }]);
-                          }
-                        }
-                      } else {
-                        setMatchLog(l => [...l, { text: "Промах!", color: "rgba(255,255,255,0.4)", id }]);
-                      }
-                      setMatchAmmo(a => ({ ...a, current: Math.max(0, a.current - 1) }));
-                      setMatchTime(t => t + Math.floor(Math.random() * 3 + 1));
-                      // Bot AI response
-                      setTimeout(() => botAct(), 600);
-                    }}>
-                    🔫 Стрелять
-                  </button>
-                  <button
-                    className="px-4 py-2.5 rounded-xl font-oswald tracking-widest uppercase text-sm transition-all active:scale-95"
-                    style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.55)" }}
-                    onClick={() => {
-                      setMatchAmmo(a => ({ current: 30, reserve: Math.max(0, a.reserve - 30) }));
-                      setMatchLog(l => [...l, { text: "Перезарядка...", color: "#ffd700", id: Date.now() }]);
-                    }}>
-                    🔄 Reload
-                  </button>
-                  <button
-                    className="px-4 py-2.5 rounded-xl font-oswald tracking-widest uppercase text-sm transition-all active:scale-95"
-                    style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.22)", color: "#39ff14" }}
-                    onClick={() => {
-                      const heal = Math.floor(Math.random() * 20 + 15);
-                      setMatchHealth(h => Math.min(100, h + heal));
-                      setMatchLog(l => [...l, { text: `💊 +${heal} HP`, color: "#39ff14", id: Date.now() }]);
-                    }}>
-                    💊 Аптечка
-                  </button>
-                  <button
-                    className="px-4 py-2.5 rounded-xl font-oswald tracking-widest uppercase text-sm transition-all active:scale-95"
-                    style={{ background: "rgba(255,215,0,0.1)", border: "1px solid rgba(255,215,0,0.22)", color: "#ffd700" }}
-                    onClick={() => {
-                      setMatchLog(l => [...l, { text: "💣 Граната брошена!", color: "#ffd700", id: Date.now() }]);
-                      const dmgAll = Math.floor(Math.random() * 30 + 15);
-                      setBots(bs => bs.map(b => b.hp > 0 ? { ...b, hp: Math.max(0, b.hp - dmgAll) } : b));
-                      setMatchTime(t => t + 3);
-                    }}>
-                    💣 Граната
+              {/* Death screen */}
+              {!matchAlive && (
+                <div className="absolute inset-0 z-40 flex flex-col items-center justify-center pointer-events-auto"
+                  style={{ background: "rgba(255,0,0,0.08)", backdropFilter: "blur(2px)" }}>
+                  <div className="font-oswald text-4xl font-black mb-2" style={{ color: "#ff4444", textShadow: "0 0 20px #ff4444" }}>ВЫ УБИТЫ</div>
+                  <div className="font-rajdhani text-lg mb-6" style={{ color: "rgba(255,255,255,0.5)" }}>Счёт: {matchScore.me} — {matchScore.bots}</div>
+                  <button className="btn-solid-cyan px-10 py-4 rounded-xl text-lg font-black"
+                    onClick={() => { setMatchHealth(100); setMatchAlive(true); setMatchLog(l => [...l, { text: "🔄 Возрождение!", color: "#00f5ff", id: Date.now() }]); }}>
+                    Возродиться
                   </button>
                 </div>
-
-                {!matchAlive && (
-                  <div className="text-center mt-3 animate-slide-up">
-                    <div className="font-oswald text-lg font-bold mb-2" style={{ color: "#ff4444" }}>Вы убиты! Ждите возрождения...</div>
-                    <button
-                      className="btn-solid-cyan px-8 py-2.5 rounded-xl font-bold"
-                      onClick={() => { setMatchHealth(100); setMatchAlive(true); setMatchLog(l => [...l, { text: "🔄 Возрождение!", color: "#00f5ff", id: Date.now() }]); }}>
-                      Возродиться
-                    </button>
-                  </div>
-                )}
-              </div>
+              )}
             </>)}
 
             {/* ── TAB: BOTS ── */}
