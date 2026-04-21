@@ -1,10 +1,16 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
 
-type Section = "menu" | "play" | "shop" | "market" | "inventory" | "cases" | "rating" | "settings" | "faq" | "collection";
+type Section = "menu" | "play" | "shop" | "market" | "inventory" | "cases" | "rating" | "settings" | "faq" | "collection" | "match";
 
 const ARENA_IMAGE = "https://cdn.poehali.dev/projects/dc723a4d-7da4-4eb3-9533-f186e94ee645/files/d8152b98-3553-4f5e-97eb-11f436aa1982.jpg";
 const SKINS_IMAGE = "https://cdn.poehali.dev/projects/dc723a4d-7da4-4eb3-9533-f186e94ee645/files/c2892e5f-0128-4f82-82d6-bfe9d3c52aa2.jpg";
+const MATCH_HUD_IMAGE = "https://cdn.poehali.dev/projects/dc723a4d-7da4-4eb3-9533-f186e94ee645/files/4bc4d3dd-4a88-4e97-bbdb-81db6349c2f1.jpg";
+const CASES_IMAGE = "https://cdn.poehali.dev/projects/dc723a4d-7da4-4eb3-9533-f186e94ee645/files/cecdc870-8167-4fbf-83c1-611c489737e6.jpg";
+const AK_SKIN_IMAGE = "https://cdn.poehali.dev/projects/dc723a4d-7da4-4eb3-9533-f186e94ee645/files/8acd270b-e9a6-496d-9b4d-3246cb4f5815.jpg";
+const M4_SKIN_IMAGE = "https://cdn.poehali.dev/projects/dc723a4d-7da4-4eb3-9533-f186e94ee645/files/68ce775e-d151-47e1-94c0-4f3df6ae34f8.jpg";
+const KARAMBIT_IMAGE = "https://cdn.poehali.dev/projects/dc723a4d-7da4-4eb3-9533-f186e94ee645/files/04b2d8fb-cbcb-4c0f-8c0a-2d4c14c6a58f.jpg";
+const SNIPER_SKIN_IMAGE = "https://cdn.poehali.dev/projects/dc723a4d-7da4-4eb3-9533-f186e94ee645/files/467f0d16-eca2-4e29-a638-2e7b8459fefc.jpg";
 
 const RANKS = [
   { name: "Рекрут", min: 0, max: 499, color: "#aaaaaa", icon: "Shield" },
@@ -59,12 +65,12 @@ const KNIVES = [
 ];
 
 const SHOP_CASES = [
-  { id: 1, name: "Базовый кейс", price: 100, color: "#aaaaaa", rarity: "common", items: "Скины оружия, брелоки" },
-  { id: 2, name: "Теневой кейс", price: 300, color: "#00f5ff", rarity: "rare", items: "Редкие скины, агенты" },
-  { id: 3, name: "Пурпурный кейс", price: 750, color: "#b44fff", rarity: "epic", items: "Эпические скины, ножи" },
-  { id: 4, name: "Огненный кейс", price: 2000, color: "#ff6b35", rarity: "epic", items: "Редкие ножи, легендарные скины" },
-  { id: 5, name: "Элитный кейс", price: 5000, color: "#ffd700", rarity: "legendary", items: "Легенды, эксклюзив" },
-  { id: 6, name: "Ультра-кейс", price: 10000, color: "#ff00ff", rarity: "ultra", items: "Ультраредкие предметы" },
+  { id: 1, name: "Базовый кейс", price: 100, color: "#aaaaaa", rarity: "common", items: "Скины оружия, брелоки", img: CASES_IMAGE },
+  { id: 2, name: "Теневой кейс", price: 300, color: "#00f5ff", rarity: "rare", items: "Редкие скины, агенты", img: CASES_IMAGE },
+  { id: 3, name: "Пурпурный кейс", price: 750, color: "#b44fff", rarity: "epic", items: "Эпические скины, ножи", img: CASES_IMAGE },
+  { id: 4, name: "Огненный кейс", price: 2000, color: "#ff6b35", rarity: "epic", items: "Редкие ножи, легендарные скины", img: CASES_IMAGE },
+  { id: 5, name: "Элитный кейс", price: 5000, color: "#ffd700", rarity: "legendary", items: "Легенды, эксклюзив", img: CASES_IMAGE },
+  { id: 6, name: "Ультра-кейс", price: 10000, color: "#ff00ff", rarity: "ultra", items: "Ультраредкие предметы", img: CASES_IMAGE },
 ];
 
 const RAIDS = [
@@ -93,20 +99,20 @@ const MARKET_LISTINGS = [
 ];
 
 const INVENTORY_ITEMS = [
-  { id: 1, name: "AK-Shadow", type: "skin", rarity: "legendary", equipped: true, icon: "Crosshair" },
-  { id: 2, name: "Агент Призрак", type: "agent", rarity: "epic", equipped: true, icon: "User" },
-  { id: 3, name: "Неон-Найф", type: "skin", rarity: "rare", equipped: false, icon: "Crosshair" },
-  { id: 4, name: "Командир Х", type: "agent", rarity: "rare", equipped: false, icon: "User" },
-  { id: 5, name: "Дракон", type: "charm", rarity: "epic", equipped: true, icon: "KeyRound" },
-  { id: 6, name: "M4-Киберпанк", type: "skin", rarity: "rare", equipped: false, icon: "Crosshair" },
-  { id: 7, name: "Агент Тень", type: "agent", rarity: "common", equipped: false, icon: "User" },
-  { id: 8, name: "Skull Key", type: "charm", rarity: "common", equipped: false, icon: "KeyRound" },
-  { id: 9, name: "Снайпер X", type: "skin", rarity: "legendary", equipped: false, icon: "Crosshair" },
-  { id: 10, name: "Кибер-Кот", type: "charm", rarity: "rare", equipped: false, icon: "KeyRound" },
-  { id: 11, name: "USP-Aurora", type: "skin", rarity: "epic", equipped: false, icon: "Crosshair" },
-  { id: 12, name: "Керамбит Тень", type: "knife", rarity: "epic", equipped: true, icon: "Scissors" },
-  { id: 13, name: "Стикер Феникс", type: "sticker", rarity: "rare", equipped: false, icon: "Tag" },
-  { id: 14, name: "Стикер Волк", type: "sticker", rarity: "common", equipped: false, icon: "Tag" },
+  { id: 1, name: "AK-Shadow", type: "skin", rarity: "legendary", equipped: true, icon: "Crosshair", img: AK_SKIN_IMAGE },
+  { id: 2, name: "Агент Призрак", type: "agent", rarity: "epic", equipped: true, icon: "User", img: null },
+  { id: 3, name: "Неон-Найф", type: "skin", rarity: "rare", equipped: false, icon: "Crosshair", img: M4_SKIN_IMAGE },
+  { id: 4, name: "Командир Х", type: "agent", rarity: "rare", equipped: false, icon: "User", img: null },
+  { id: 5, name: "Дракон", type: "charm", rarity: "epic", equipped: true, icon: "KeyRound", img: null },
+  { id: 6, name: "M4-Киберпанк", type: "skin", rarity: "rare", equipped: false, icon: "Crosshair", img: M4_SKIN_IMAGE },
+  { id: 7, name: "Агент Тень", type: "agent", rarity: "common", equipped: false, icon: "User", img: null },
+  { id: 8, name: "Skull Key", type: "charm", rarity: "common", equipped: false, icon: "KeyRound", img: null },
+  { id: 9, name: "Снайпер X", type: "skin", rarity: "legendary", equipped: false, icon: "Crosshair", img: SNIPER_SKIN_IMAGE },
+  { id: 10, name: "Кибер-Кот", type: "charm", rarity: "rare", equipped: false, icon: "KeyRound", img: null },
+  { id: 11, name: "USP-Aurora", type: "skin", rarity: "epic", equipped: false, icon: "Crosshair", img: AK_SKIN_IMAGE },
+  { id: 12, name: "Керамбит Тень", type: "knife", rarity: "epic", equipped: true, icon: "Scissors", img: KARAMBIT_IMAGE },
+  { id: 13, name: "Стикер Феникс", type: "sticker", rarity: "rare", equipped: false, icon: "Tag", img: null },
+  { id: 14, name: "Стикер Волк", type: "sticker", rarity: "common", equipped: false, icon: "Tag", img: null },
 ];
 
 const CASE_REEL = [
@@ -154,6 +160,17 @@ export default function Index() {
   const [selectedBot, setSelectedBot] = useState<string | null>(null);
   const [customBot, setCustomBot] = useState({ accuracy: 60, speed: 60, aggro: 60, health: 100 });
   const [playStep, setPlayStep] = useState<"map" | "bot" | "ready">("map");
+
+  // Match
+  const [matchTime, setMatchTime] = useState(0);
+  const [matchScore, setMatchScore] = useState({ me: 0, bots: 0 });
+  const [matchKills, setMatchKills] = useState(0);
+  const [matchAlive, setMatchAlive] = useState(true);
+  const [matchHealth, setMatchHealth] = useState(100);
+  const [matchAmmo, setMatchAmmo] = useState({ current: 30, reserve: 90 });
+  const [matchLog, setMatchLog] = useState<{ text: string; color: string; id: number }[]>([
+    { text: "Матч начался!", color: "#00f5ff", id: 1 },
+  ]);
 
   // Shop
   const [shopTab, setShopTab] = useState<"cases" | "raids" | "oc">("cases");
@@ -528,7 +545,17 @@ export default function Index() {
                   </div>
                 </div>
 
-                <button className="btn-solid-cyan w-full py-5 rounded-xl text-xl font-black tracking-widest">
+                <button className="btn-solid-cyan w-full py-5 rounded-xl text-xl font-black tracking-widest"
+                  onClick={() => {
+                    setMatchTime(0);
+                    setMatchScore({ me: 0, bots: 0 });
+                    setMatchKills(0);
+                    setMatchAlive(true);
+                    setMatchHealth(100);
+                    setMatchAmmo({ current: 30, reserve: 90 });
+                    setMatchLog([{ text: "Матч начался!", color: "#00f5ff", id: Date.now() }]);
+                    navigate("match");
+                  }}>
                   ⚔️ В БОЙ!
                 </button>
                 <button onClick={() => setPlayStep("map")} className="mt-3 text-sm font-oswald tracking-wide uppercase"
@@ -582,12 +609,13 @@ export default function Index() {
                   <div key={c.id} className="card-dark rounded-xl overflow-hidden cursor-pointer"
                     style={{ borderColor: `${c.color}25` }}
                     onClick={() => { setOpeningCase(c); setCaseResult(null); setCaseSpinning(false); navigate("cases"); }}>
-                    <div className="h-36 flex items-center justify-center"
-                      style={{ background: `radial-gradient(circle, ${c.color}12 0%, transparent 70%)` }}>
-                      <div className="animate-float">
-                        <div className="w-20 h-20 rounded-xl flex items-center justify-center"
-                          style={{ background: `${c.color}12`, border: `2px solid ${c.color}30`, boxShadow: `0 0 25px ${c.color}20` }}>
-                          <Icon name="Gift" size={40} style={{ color: c.color }} />
+                    <div className="h-36 relative overflow-hidden">
+                      <img src={c.img} alt={c.name} className="w-full h-full object-cover" style={{ filter: `hue-rotate(${c.id * 40}deg) saturate(1.4)` }} />
+                      <div className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(7,7,15,0.85) 0%, transparent 60%)` }} />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-14 h-14 rounded-xl flex items-center justify-center animate-float"
+                          style={{ background: `${c.color}20`, border: `2px solid ${c.color}50`, boxShadow: `0 0 20px ${c.color}40` }}>
+                          <Icon name="Gift" size={30} style={{ color: c.color }} />
                         </div>
                       </div>
                     </div>
@@ -787,9 +815,11 @@ export default function Index() {
                 .map(item => (
                 <div key={item.id} className={`card-dark rounded-xl p-3 cursor-pointer rarity-${item.rarity}`}
                   style={{ borderColor: item.equipped ? "rgba(0,245,255,0.3)" : "" }}>
-                  <div className="aspect-square rounded-lg mb-2 flex items-center justify-center"
+                  <div className="aspect-square rounded-lg mb-2 flex items-center justify-center overflow-hidden"
                     style={{ background: `${rarityColor[item.rarity]}08` }}>
-                    <Icon name={item.icon} size={26} />
+                    {item.img
+                      ? <img src={item.img} alt={item.name} className="w-full h-full object-cover" />
+                      : <Icon name={item.icon} size={26} />}
                   </div>
                   <div className="font-rajdhani font-bold text-xs text-white leading-tight">{item.name}</div>
                   <div className="text-[10px] mt-0.5" style={{ color: rarityColor[item.rarity] }}>{rarityLabel[item.rarity]}</div>
@@ -827,6 +857,16 @@ export default function Index() {
                   <Icon name="ChevronLeft" size={16} /> Назад в магазин
                 </button>
 
+                {/* Case preview image */}
+                <div className="relative w-36 h-36 mx-auto mb-5 rounded-2xl overflow-hidden animate-float"
+                  style={{ border: `2px solid ${openingCase.color}50`, boxShadow: `0 0 40px ${openingCase.color}30` }}>
+                  <img src={openingCase.img} alt={openingCase.name} className="w-full h-full object-cover"
+                    style={{ filter: `hue-rotate(${openingCase.id * 40}deg) saturate(1.5)` }} />
+                  <div className="absolute inset-0 flex items-center justify-center"
+                    style={{ background: `radial-gradient(circle, transparent 30%, ${openingCase.color}20 100%)` }}>
+                    <Icon name="Gift" size={42} style={{ color: openingCase.color, filter: `drop-shadow(0 0 10px ${openingCase.color})` }} />
+                  </div>
+                </div>
                 <div className="font-oswald text-2xl font-bold mb-2" style={{ color: openingCase.color }}>{openingCase.name}</div>
                 <div className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.4)" }}>Цена: {openingCase.price} OC</div>
 
@@ -1319,6 +1359,192 @@ export default function Index() {
                       </button>
                     ))}
                   </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ===== MATCH ===== */}
+        {section === "match" && (
+          <div className="relative w-full" style={{ minHeight: "calc(100vh - 4rem)" }}>
+            {/* Background: map screenshot */}
+            <div className="absolute inset-0 overflow-hidden">
+              <img src={MATCH_HUD_IMAGE} alt="Match" className="w-full h-full object-cover" />
+              <div className="absolute inset-0" style={{ background: "rgba(7,7,15,0.55)" }} />
+            </div>
+
+            {/* ---- HUD TOP ---- */}
+            <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-3">
+              {/* Score */}
+              <div className="flex items-center gap-3">
+                <div className="px-4 py-2 rounded-lg text-center"
+                  style={{ background: "rgba(0,245,255,0.15)", border: "1px solid rgba(0,245,255,0.3)" }}>
+                  <div className="font-oswald text-2xl font-black" style={{ color: "var(--neon-cyan)" }}>{matchScore.me}</div>
+                  <div className="text-[9px] font-oswald tracking-widest" style={{ color: "rgba(255,255,255,0.5)" }}>ВЫ</div>
+                </div>
+                <div className="font-oswald text-lg font-bold" style={{ color: "rgba(255,255,255,0.4)" }}>VS</div>
+                <div className="px-4 py-2 rounded-lg text-center"
+                  style={{ background: "rgba(255,107,53,0.15)", border: "1px solid rgba(255,107,53,0.3)" }}>
+                  <div className="font-oswald text-2xl font-black" style={{ color: "#ff6b35" }}>{matchScore.bots}</div>
+                  <div className="text-[9px] font-oswald tracking-widest" style={{ color: "rgba(255,255,255,0.5)" }}>БОТЫ</div>
+                </div>
+              </div>
+
+              {/* Timer + Map */}
+              <div className="text-center">
+                <div className="font-oswald text-xl font-bold text-white">
+                  {String(Math.floor(matchTime / 60)).padStart(2,"0")}:{String(matchTime % 60).padStart(2,"0")}
+                </div>
+                <div className="text-[10px] font-oswald tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>
+                  {MAPS.find(m => m.id === selectedMap)?.name || "Арена"}
+                </div>
+              </div>
+
+              {/* Kills + exit */}
+              <div className="flex items-center gap-3">
+                <div className="px-3 py-2 rounded-lg text-center"
+                  style={{ background: "rgba(180,79,255,0.15)", border: "1px solid rgba(180,79,255,0.3)" }}>
+                  <div className="font-oswald text-xl font-black" style={{ color: "#b44fff" }}>{matchKills}</div>
+                  <div className="text-[9px] font-oswald tracking-widest" style={{ color: "rgba(255,255,255,0.5)" }}>УБИЙСТВ</div>
+                </div>
+                <button onClick={() => navigate("play")}
+                  className="px-3 py-2 rounded-lg font-oswald text-xs tracking-wide uppercase"
+                  style={{ background: "rgba(255,0,0,0.15)", border: "1px solid rgba(255,0,0,0.3)", color: "#ff4444" }}>
+                  <Icon name="LogOut" size={14} />
+                </button>
+              </div>
+            </div>
+
+            {/* ---- Kill Feed ---- */}
+            <div className="absolute top-16 right-4 z-10 space-y-1 max-w-xs">
+              {matchLog.slice(-5).map(log => (
+                <div key={log.id} className="text-xs font-rajdhani font-bold px-3 py-1.5 rounded animate-slide-up"
+                  style={{ background: "rgba(0,0,0,0.6)", color: log.color, border: `1px solid ${log.color}30` }}>
+                  {log.text}
+                </div>
+              ))}
+            </div>
+
+            {/* ---- CENTER crosshair ---- */}
+            <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+              <div className="relative w-8 h-8">
+                <div className="absolute top-0 left-1/2 w-0.5 h-3 -translate-x-1/2" style={{ background: "rgba(0,245,255,0.8)" }} />
+                <div className="absolute bottom-0 left-1/2 w-0.5 h-3 -translate-x-1/2" style={{ background: "rgba(0,245,255,0.8)" }} />
+                <div className="absolute left-0 top-1/2 h-0.5 w-3 -translate-y-1/2" style={{ background: "rgba(0,245,255,0.8)" }} />
+                <div className="absolute right-0 top-1/2 h-0.5 w-3 -translate-y-1/2" style={{ background: "rgba(0,245,255,0.8)" }} />
+                <div className="absolute inset-0 m-auto w-1 h-1 rounded-full" style={{ background: "rgba(0,245,255,0.9)" }} />
+              </div>
+            </div>
+
+            {/* ---- HUD BOTTOM ---- */}
+            <div className="absolute bottom-4 left-0 right-0 z-10 flex items-end justify-between px-4">
+              {/* Health + armor */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Icon name="Heart" size={14} style={{ color: "#ff4444" }} />
+                  <div className="w-32 h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.1)" }}>
+                    <div className="h-full rounded-full transition-all"
+                      style={{ width: `${matchHealth}%`, background: matchHealth > 50 ? "#39ff14" : matchHealth > 25 ? "#ffd700" : "#ff4444" }} />
+                  </div>
+                  <span className="font-oswald text-sm font-bold text-white">{matchHealth}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Icon name="Shield" size={14} style={{ color: "#4d9fff" }} />
+                  <div className="w-32 h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.1)" }}>
+                    <div className="h-full rounded-full" style={{ width: "65%", background: "#4d9fff" }} />
+                  </div>
+                  <span className="font-oswald text-sm font-bold text-white">65</span>
+                </div>
+              </div>
+
+              {/* Mini map placeholder */}
+              <div className="w-28 h-28 rounded-lg overflow-hidden"
+                style={{ border: "1px solid rgba(0,245,255,0.3)", background: "rgba(0,0,0,0.6)" }}>
+                <div className="w-full h-full relative flex items-center justify-center">
+                  <Icon name="Map" size={18} style={{ color: "rgba(0,245,255,0.3)" }} />
+                  {/* Player dot */}
+                  <div className="absolute w-2 h-2 rounded-full animate-pulse-neon"
+                    style={{ background: "var(--neon-cyan)", top: "55%", left: "45%" }} />
+                  {/* Bot dots */}
+                  {[{t:"25%",l:"65%"},{t:"70%",l:"30%"},{t:"40%",l:"75%"}].map((pos,i) => (
+                    <div key={i} className="absolute w-1.5 h-1.5 rounded-full"
+                      style={{ background: "#ff6b35", top: pos.t, left: pos.l }} />
+                  ))}
+                </div>
+              </div>
+
+              {/* Weapon + Ammo */}
+              <div className="text-right">
+                <div className="flex items-center gap-3 justify-end mb-1">
+                  <img src={AK_SKIN_IMAGE} alt="weapon" className="h-10 w-20 object-cover rounded"
+                    style={{ filter: "brightness(1.1) saturate(1.3)" }} />
+                </div>
+                <div className="font-oswald text-2xl font-black text-white">
+                  {matchAmmo.current}
+                  <span className="text-sm font-normal ml-1" style={{ color: "rgba(255,255,255,0.4)" }}>/ {matchAmmo.reserve}</span>
+                </div>
+                <div className="text-[10px] font-oswald tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>AK-SHADOW</div>
+              </div>
+            </div>
+
+            {/* ---- CONTROLS ---- */}
+            <div className="absolute bottom-36 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-3">
+              <div className="flex gap-3">
+                <button
+                  className="px-6 py-3 rounded-xl font-oswald tracking-widest uppercase text-sm font-bold transition-all active:scale-95"
+                  style={{ background: "rgba(0,245,255,0.2)", border: "1px solid rgba(0,245,255,0.4)", color: "var(--neon-cyan)", boxShadow: "0 0 15px rgba(0,245,255,0.2)" }}
+                  onClick={() => {
+                    const killed = Math.random() > 0.4;
+                    const id = Date.now();
+                    if (killed) {
+                      setMatchScore(s => ({ ...s, me: s.me + 1 }));
+                      setMatchKills(k => k + 1);
+                      setMatchAmmo(a => ({ ...a, current: Math.max(0, a.current - Math.floor(Math.random() * 8 + 3)) }));
+                      setMatchLog(l => [...l, { text: `+1 Убийство! Фраг #${matchKills + 1}`, color: "#00f5ff", id }]);
+                    } else {
+                      const dmg = Math.floor(Math.random() * 25 + 10);
+                      setMatchHealth(h => Math.max(0, h - dmg));
+                      setMatchAmmo(a => ({ ...a, current: Math.max(0, a.current - Math.floor(Math.random() * 5 + 2)) }));
+                      setMatchLog(l => [...l, { text: `Промах! −${dmg} HP`, color: "#ff6b35", id }]);
+                      if (matchHealth - dmg <= 0) {
+                        setMatchAlive(false);
+                        setMatchScore(s => ({ ...s, bots: s.bots + 1 }));
+                        setMatchLog(l => [...l, { text: "Вы убиты!", color: "#ff4444", id: id + 1 }]);
+                      }
+                    }
+                    setMatchTime(t => t + Math.floor(Math.random() * 5 + 2));
+                  }}>
+                  🔫 Стрелять
+                </button>
+                <button
+                  className="px-4 py-3 rounded-xl font-oswald tracking-widest uppercase text-sm transition-all active:scale-95"
+                  style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.6)" }}
+                  onClick={() => {
+                    setMatchAmmo(a => ({ current: 30, reserve: Math.max(0, a.reserve - 30) }));
+                    setMatchLog(l => [...l, { text: "Перезарядка!", color: "#ffd700", id: Date.now() }]);
+                  }}>
+                  🔄 Reload
+                </button>
+                <button
+                  className="px-4 py-3 rounded-xl font-oswald tracking-widest uppercase text-sm transition-all active:scale-95"
+                  style={{ background: "rgba(57,255,20,0.12)", border: "1px solid rgba(57,255,20,0.25)", color: "#39ff14" }}
+                  onClick={() => {
+                    const heal = Math.floor(Math.random() * 20 + 15);
+                    setMatchHealth(h => Math.min(100, h + heal));
+                    setMatchLog(l => [...l, { text: `Аптечка +${heal} HP`, color: "#39ff14", id: Date.now() }]);
+                  }}>
+                  💊 Аптечка
+                </button>
+              </div>
+              {!matchAlive && (
+                <div className="text-center animate-slide-up">
+                  <div className="font-oswald text-xl font-bold mb-3" style={{ color: "#ff4444" }}>Вы убиты!</div>
+                  <button
+                    className="btn-solid-cyan px-8 py-3 rounded-xl font-bold"
+                    onClick={() => { setMatchHealth(100); setMatchAlive(true); setMatchLog(l => [...l, { text: "Возрождение!", color: "#00f5ff", id: Date.now() }]); }}>
+                    Возродиться
+                  </button>
                 </div>
               )}
             </div>
