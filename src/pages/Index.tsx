@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
 
-type Section = "menu" | "arena" | "inventory" | "cases" | "rating" | "settings" | "faq";
+type Section = "menu" | "play" | "shop" | "market" | "inventory" | "cases" | "rating" | "settings" | "faq" | "collection";
 
 const ARENA_IMAGE = "https://cdn.poehali.dev/projects/dc723a4d-7da4-4eb3-9533-f186e94ee645/files/d8152b98-3553-4f5e-97eb-11f436aa1982.jpg";
 const SKINS_IMAGE = "https://cdn.poehali.dev/projects/dc723a4d-7da4-4eb3-9533-f186e94ee645/files/c2892e5f-0128-4f82-82d6-bfe9d3c52aa2.jpg";
@@ -34,28 +34,82 @@ const PLAYERS = [
   { name: "Новобранец", xp: 620, kills: 134, wins: 32, country: "🇰🇿" },
 ];
 
-const ITEMS = [
-  { id: 1, name: "AK-Shadow", type: "skin", rarity: "legendary", equipped: true },
-  { id: 2, name: "Призрак", type: "agent", rarity: "epic", equipped: true },
-  { id: 3, name: "Неон-Найф", type: "skin", rarity: "rare", equipped: false },
-  { id: 4, name: "Командир Х", type: "agent", rarity: "rare", equipped: false },
-  { id: 5, name: "Дракон", type: "charm", rarity: "epic", equipped: true },
-  { id: 6, name: "M4-Киберпанк", type: "skin", rarity: "rare", equipped: false },
-  { id: 7, name: "Агент Тень", type: "agent", rarity: "common", equipped: false },
-  { id: 8, name: "Skull Key", type: "charm", rarity: "common", equipped: false },
-  { id: 9, name: "Снайпер X", type: "skin", rarity: "legendary", equipped: false },
-  { id: 10, name: "Кибер-Кот", type: "charm", rarity: "rare", equipped: false },
-  { id: 11, name: "USP-Aurora", type: "skin", rarity: "epic", equipped: false },
-  { id: 12, name: "Пиратский", type: "charm", rarity: "common", equipped: false },
+const MAPS = [
+  { id: 1, name: "Завод «Авангард»", desc: "Цеха, склады, мосты, трубы", icon: "Factory", color: "#ff6b35", tags: ["Промышленная", "Средняя"] },
+  { id: 2, name: "Мегаполис", desc: "Узкие улицы, высотки, подземные переходы", icon: "Building2", color: "#00f5ff", tags: ["Городская", "Крупная"] },
+  { id: 3, name: "Пустыня «Сахара»", desc: "Открытые зоны, руины, песчаные бури", icon: "Sun", color: "#ffd700", tags: ["Открытая", "Крупная"] },
+  { id: 4, name: "Лаборатория X-17", desc: "Коридоры, лаборатории, аварийное освещение", icon: "FlaskConical", color: "#39ff14", tags: ["Тесная", "Малая"] },
+  { id: 5, name: "Порт «Атлантис»", desc: "Контейнеры, корабли, краны, туман", icon: "Ship", color: "#b44fff", tags: ["Смешанная", "Средняя"] },
 ];
 
-const CASES = [
-  { id: 1, name: "Теневой кейс", price: 299, color: "#00f5ff", items: ["AK-Shadow", "Призрак", "Неон-Найф", "Дракон", "Агент Тень"] },
-  { id: 2, name: "Пурпурный кейс", price: 499, color: "#b44fff", items: ["Снайпер X", "Кибер-Кот", "USP-Aurora", "Командир Х", "Skull Key"] },
-  { id: 3, name: "Огненный кейс", price: 799, color: "#ff6b35", items: ["Легенда", "Феникс", "Огненный меч", "Дракон X", "Командир"] },
+const BOT_LEVELS = [
+  { id: "novice", name: "Новичок", desc: "Низкая точность, медленные реакции", color: "#39ff14", icon: "Baby", stats: { accuracy: 20, speed: 25, aggro: 15 } },
+  { id: "experienced", name: "Опытный", desc: "Средняя меткость, базовые манёвры", color: "#4d9fff", icon: "User", stats: { accuracy: 50, speed: 55, aggro: 45 } },
+  { id: "pro", name: "Профессионал", desc: "Высокая точность, агрессивные атаки", color: "#ffd700", icon: "Star", stats: { accuracy: 75, speed: 75, aggro: 80 } },
+  { id: "elite", name: "Элита", desc: "Максимальная сложность, продвинутые тактики", color: "#ff6b35", icon: "Flame", stats: { accuracy: 95, speed: 92, aggro: 95 } },
+  { id: "custom", name: "Кастомный", desc: "Ручная настройка всех параметров", color: "#b44fff", icon: "Sliders", stats: { accuracy: 60, speed: 60, aggro: 60 } },
 ];
 
-const CASE_ITEMS_REEL = [
+const KNIVES = [
+  { id: 1, name: "Керамбит", skins: ["Тень", "Ледник"], icon: "Scissors", color: "#00f5ff" },
+  { id: 2, name: "Бабочка", skins: ["Феникс", "Вулкан"], icon: "Wind", color: "#ff6b35" },
+  { id: 3, name: "Стилет", skins: ["Призрак", "Мрак"], icon: "Minus", color: "#b44fff" },
+  { id: 4, name: "Тактический", skins: ["Шторм", "Буря"], icon: "Zap", color: "#ffd700" },
+  { id: 5, name: "Баллистический", skins: ["Кобра", "Аспид"], icon: "ArrowUp", color: "#39ff14" },
+];
+
+const SHOP_CASES = [
+  { id: 1, name: "Базовый кейс", price: 100, color: "#aaaaaa", rarity: "common", items: "Скины оружия, брелоки" },
+  { id: 2, name: "Теневой кейс", price: 300, color: "#00f5ff", rarity: "rare", items: "Редкие скины, агенты" },
+  { id: 3, name: "Пурпурный кейс", price: 750, color: "#b44fff", rarity: "epic", items: "Эпические скины, ножи" },
+  { id: 4, name: "Огненный кейс", price: 2000, color: "#ff6b35", rarity: "epic", items: "Редкие ножи, легендарные скины" },
+  { id: 5, name: "Элитный кейс", price: 5000, color: "#ffd700", rarity: "legendary", items: "Легенды, эксклюзив" },
+  { id: 6, name: "Ультра-кейс", price: 10000, color: "#ff00ff", rarity: "ultra", items: "Ультраредкие предметы" },
+];
+
+const RAIDS = [
+  { id: 1, name: "Операция «Шторм»", days: 7, price: 500, color: "#00f5ff", ends: "5 дней", reward: "Агент «Командос», эксклюзивный скин AK" },
+  { id: 2, name: "Сезон «Феникс»", days: 14, price: 1200, color: "#ff6b35", ends: "12 дней", reward: "Набор «Феникс»: нож + скин + агент" },
+];
+
+const OC_PACKS = [
+  { oc: 100, price: 50, bonus: 0, label: "Старт" },
+  { oc: 500, price: 220, bonus: 10, label: "Популярный" },
+  { oc: 1200, price: 500, bonus: 20, label: "Выгодный" },
+  { oc: 3000, price: 1100, bonus: 30, label: "Продвинутый" },
+  { oc: 7000, price: 2400, bonus: 40, label: "Элитный" },
+  { oc: 15000, price: 4500, bonus: 50, label: "Командирский" },
+];
+
+const MARKET_LISTINGS = [
+  { id: 1, name: "AK-Shadow «Ночь»", type: "skin", rarity: "legendary", price: 3200, seller: "ShadowX_Pro", icon: "Crosshair" },
+  { id: 2, name: "Керамбит «Тень»", type: "knife", rarity: "epic", price: 1800, seller: "NightStrike", icon: "Scissors" },
+  { id: 3, name: "Агент «Призрак»", type: "agent", rarity: "epic", price: 950, seller: "Кибер_Волк", icon: "User" },
+  { id: 4, name: "M4-Киберпанк", type: "skin", rarity: "rare", price: 420, seller: "IceSniper777", icon: "Crosshair" },
+  { id: 5, name: "Брелок «Дракон»", type: "charm", rarity: "epic", price: 680, seller: "Тень_Воина", icon: "KeyRound" },
+  { id: 6, name: "Стикер «Череп»", type: "sticker", rarity: "rare", price: 150, seller: "VortexKiller", icon: "Tag" },
+  { id: 7, name: "Бабочка «Феникс»", type: "knife", rarity: "legendary", price: 5500, seller: "PhantomGhost", icon: "Wind" },
+  { id: 8, name: "USP-Aurora", type: "skin", rarity: "epic", price: 780, seller: "DarkPulse", icon: "Crosshair" },
+];
+
+const INVENTORY_ITEMS = [
+  { id: 1, name: "AK-Shadow", type: "skin", rarity: "legendary", equipped: true, icon: "Crosshair" },
+  { id: 2, name: "Агент Призрак", type: "agent", rarity: "epic", equipped: true, icon: "User" },
+  { id: 3, name: "Неон-Найф", type: "skin", rarity: "rare", equipped: false, icon: "Crosshair" },
+  { id: 4, name: "Командир Х", type: "agent", rarity: "rare", equipped: false, icon: "User" },
+  { id: 5, name: "Дракон", type: "charm", rarity: "epic", equipped: true, icon: "KeyRound" },
+  { id: 6, name: "M4-Киберпанк", type: "skin", rarity: "rare", equipped: false, icon: "Crosshair" },
+  { id: 7, name: "Агент Тень", type: "agent", rarity: "common", equipped: false, icon: "User" },
+  { id: 8, name: "Skull Key", type: "charm", rarity: "common", equipped: false, icon: "KeyRound" },
+  { id: 9, name: "Снайпер X", type: "skin", rarity: "legendary", equipped: false, icon: "Crosshair" },
+  { id: 10, name: "Кибер-Кот", type: "charm", rarity: "rare", equipped: false, icon: "KeyRound" },
+  { id: 11, name: "USP-Aurora", type: "skin", rarity: "epic", equipped: false, icon: "Crosshair" },
+  { id: 12, name: "Керамбит Тень", type: "knife", rarity: "epic", equipped: true, icon: "Scissors" },
+  { id: 13, name: "Стикер Феникс", type: "sticker", rarity: "rare", equipped: false, icon: "Tag" },
+  { id: 14, name: "Стикер Волк", type: "sticker", rarity: "common", equipped: false, icon: "Tag" },
+];
+
+const CASE_REEL = [
   { name: "Агент Тень", rarity: "common" },
   { name: "Skull Key", rarity: "common" },
   { name: "Неон-Найф", rarity: "rare" },
@@ -75,37 +129,60 @@ const CASE_ITEMS_REEL = [
 ];
 
 const rarityLabel: Record<string, string> = {
-  common: "Обычный",
-  rare: "Редкий",
-  epic: "Эпический",
-  legendary: "Легендарный",
+  common: "Обычный", rare: "Редкий", epic: "Эпический",
+  legendary: "Легендарный", ultra: "Ультраредкий",
+};
+const rarityColor: Record<string, string> = {
+  common: "#aaa", rare: "#4d9fff", epic: "#b44fff",
+  legendary: "#ffd700", ultra: "#ff00ff",
 };
 
 const typeLabel: Record<string, string> = {
-  skin: "Скин",
-  agent: "Агент",
-  charm: "Брелок",
-};
-
-const typeIcon: Record<string, string> = {
-  skin: "Crosshair",
-  agent: "User",
-  charm: "KeyRound",
+  skin: "Скин", agent: "Агент", charm: "Брелок",
+  knife: "Нож", sticker: "Наклейка",
 };
 
 const playerXP = 1340;
+const playerOC = 850;
 
 export default function Index() {
   const [section, setSection] = useState<Section>("menu");
   const [animating, setAnimating] = useState(false);
+
+  // Play
+  const [selectedMap, setSelectedMap] = useState<number | null>(null);
+  const [selectedBot, setSelectedBot] = useState<string | null>(null);
+  const [customBot, setCustomBot] = useState({ accuracy: 60, speed: 60, aggro: 60, health: 100 });
+  const [playStep, setPlayStep] = useState<"map" | "bot" | "ready">("map");
+
+  // Shop
+  const [shopTab, setShopTab] = useState<"cases" | "raids" | "oc">("cases");
+
+  // Market
+  const [marketFilter, setMarketFilter] = useState<string>("all");
+
+  // Inventory
   const [inventoryFilter, setInventoryFilter] = useState<string>("all");
-  const [openingCase, setOpeningCase] = useState<number | null>(null);
+
+  // Cases
+  const [openingCase, setOpeningCase] = useState<typeof SHOP_CASES[0] | null>(null);
   const [caseResult, setCaseResult] = useState<{ name: string; rarity: string } | null>(null);
   const [caseSpinning, setCaseSpinning] = useState(false);
+  const [spinOffset, setSpinOffset] = useState(0);
+
+  // Rating
+  const [ratingTab, setRatingTab] = useState<"table" | "ranks">("table");
+
+  // Settings
   const [settingsTab, setSettingsTab] = useState("graphics");
   const [graphics, setGraphics] = useState({ quality: "Высокое", fps: "120", shadows: true, blur: true });
   const [audio, setAudio] = useState({ master: 80, music: 60, effects: 90, voice: 70 });
+
+  // FAQ
   const [faqOpen, setFaqOpen] = useState<number | null>(null);
+
+  // Collection
+  const [collectionTab, setCollectionTab] = useState<"weapons" | "agents" | "knives" | "stickers" | "charms">("weapons");
 
   const rank = getRank(playerXP);
   const nextRank = getNextRank(playerXP);
@@ -114,269 +191,610 @@ export default function Index() {
   const navigate = (s: Section) => {
     if (s === section) return;
     setAnimating(true);
-    setTimeout(() => {
-      setSection(s);
-      setAnimating(false);
-    }, 180);
-  };
-
-  const openCase = (caseId: number) => {
-    setOpeningCase(caseId);
-    setCaseResult(null);
-    setCaseSpinning(false);
+    setTimeout(() => { setSection(s); setAnimating(false); }, 180);
   };
 
   const spinCase = () => {
     if (caseSpinning) return;
     setCaseSpinning(true);
     setCaseResult(null);
-    const winnerIdx = Math.floor(Math.random() * CASE_ITEMS_REEL.length);
+    const target = Math.floor(Math.random() * CASE_REEL.length);
+    const offset = (target + CASE_REEL.length * 3) * 108;
+    setSpinOffset(offset);
     setTimeout(() => {
       setCaseSpinning(false);
-      setCaseResult(CASE_ITEMS_REEL[winnerIdx]);
-    }, 3200);
+      setCaseResult(CASE_REEL[target % CASE_REEL.length]);
+    }, 3500);
   };
 
   const navItems: { id: Section; label: string; icon: string }[] = [
     { id: "menu", label: "Главная", icon: "Home" },
-    { id: "arena", label: "Арена", icon: "Crosshair" },
+    { id: "play", label: "Играть", icon: "Play" },
+    { id: "shop", label: "Магазин", icon: "ShoppingBag" },
+    { id: "market", label: "Рынок", icon: "TrendingUp" },
     { id: "inventory", label: "Инвентарь", icon: "Package" },
-    { id: "cases", label: "Кейсы", icon: "Gift" },
     { id: "rating", label: "Рейтинг", icon: "Trophy" },
+    { id: "collection", label: "Коллекция", icon: "LayoutGrid" },
     { id: "settings", label: "Настройки", icon: "Settings" },
-    { id: "faq", label: "Помощь", icon: "HelpCircle" },
   ];
 
   return (
     <div className="min-h-screen grid-bg" style={{ background: "var(--dark-bg)" }}>
 
       {/* Top Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-3"
-        style={{ background: "linear-gradient(180deg, rgba(7,7,15,0.98) 0%, rgba(7,7,15,0.85) 100%)", borderBottom: "1px solid rgba(0,245,255,0.08)", backdropFilter: "blur(20px)" }}>
+      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 md:px-6 py-3"
+        style={{ background: "rgba(7,7,15,0.97)", borderBottom: "1px solid rgba(0,245,255,0.08)", backdropFilter: "blur(20px)" }}>
         <div className="flex items-center gap-3">
-          <div className="relative w-8 h-8">
+          <div className="relative w-8 h-8 flex-shrink-0">
             <div className="absolute inset-0 rounded" style={{ background: "linear-gradient(135deg, #00f5ff, #b44fff)", boxShadow: "0 0 15px rgba(0,245,255,0.5)" }} />
             <div className="absolute inset-0.5 rounded" style={{ background: "var(--dark-bg)" }} />
             <div className="absolute inset-0 flex items-center justify-center">
               <Icon name="Swords" size={14} style={{ color: "var(--neon-cyan)" }} />
             </div>
           </div>
-          <span className="font-oswald font-bold text-lg tracking-widest" style={{ color: "var(--neon-cyan)", textShadow: "0 0 15px rgba(0,245,255,0.5)" }}>
+          <span className="font-oswald font-bold text-lg tracking-widest hidden sm:block"
+            style={{ color: "var(--neon-cyan)", textShadow: "0 0 15px rgba(0,245,255,0.4)" }}>
             SHADOW<span style={{ color: "var(--neon-purple)" }}>WAR</span>
           </span>
         </div>
 
-        <div className="hidden md:flex items-center gap-1">
+        <div className="hidden lg:flex items-center gap-0.5">
           {navItems.map(item => (
             <button key={item.id} onClick={() => navigate(item.id)}
-              className={`nav-item ${section === item.id ? "active" : ""}`}>
+              className={`nav-item text-xs ${section === item.id ? "active" : ""}`}>
               {item.label}
             </button>
           ))}
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="text-right hidden sm:block">
-            <div className="font-rajdhani font-bold text-sm" style={{ color: rank.color }}>{rank.name}</div>
-            <div className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>{playerXP} XP</div>
+          {/* OC Balance */}
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded"
+            style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.2)" }}>
+            <div className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
+              style={{ background: "var(--neon-cyan)", color: "#07070f" }}>C</div>
+            <span className="font-oswald text-sm font-bold" style={{ color: "var(--neon-cyan)" }}>{playerOC}</span>
+            <span className="text-[10px] hidden sm:block" style={{ color: "rgba(255,255,255,0.3)" }}>OC</span>
           </div>
-          <div className="w-9 h-9 rounded-full flex items-center justify-center border-2"
-            style={{ borderColor: rank.color, background: "rgba(0,0,0,0.5)", boxShadow: `0 0 10px ${rank.color}40` }}>
-            <Icon name="User" size={16} style={{ color: rank.color }} />
+          <div className="w-8 h-8 rounded-full flex items-center justify-center border-2"
+            style={{ borderColor: rank.color, background: "rgba(0,0,0,0.5)" }}>
+            <Icon name="User" size={14} style={{ color: rank.color }} />
           </div>
         </div>
       </nav>
 
       {/* Mobile Bottom Nav */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around py-2"
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around py-1.5"
         style={{ background: "rgba(7,7,15,0.97)", borderTop: "1px solid rgba(0,245,255,0.1)" }}>
         {navItems.map(item => (
           <button key={item.id} onClick={() => navigate(item.id)}
-            className="flex flex-col items-center gap-0.5 p-2 rounded transition-all"
-            style={section === item.id ? { color: "var(--neon-cyan)" } : { color: "rgba(255,255,255,0.35)" }}>
-            <Icon name={item.icon} size={18} />
-            <span className="text-[9px] font-oswald tracking-wide uppercase">{item.label}</span>
+            className="flex flex-col items-center gap-0.5 p-1.5 rounded transition-all"
+            style={section === item.id ? { color: "var(--neon-cyan)" } : { color: "rgba(255,255,255,0.3)" }}>
+            <Icon name={item.icon} size={17} />
+            <span className="text-[8px] font-oswald tracking-wide uppercase">{item.label}</span>
           </button>
         ))}
       </div>
 
-      {/* Main Content */}
+      {/* Content */}
       <main style={{
-        paddingTop: "4rem",
-        paddingBottom: "5rem",
+        paddingTop: "4rem", paddingBottom: "5rem",
         opacity: animating ? 0 : 1,
-        transform: animating ? "translateY(8px)" : "translateY(0)",
+        transform: animating ? "translateY(6px)" : "translateY(0)",
         transition: "opacity 0.18s ease, transform 0.18s ease"
       }}>
 
-        {/* ========== MAIN MENU ========== */}
+        {/* ===== MAIN MENU ===== */}
         {section === "menu" && (
           <div className="relative min-h-screen flex flex-col items-center justify-center px-4">
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <div className="absolute w-96 h-96 rounded-full opacity-10" style={{ background: "radial-gradient(circle, #00f5ff, transparent)", top: "8%", left: "5%", filter: "blur(80px)" }} />
-              <div className="absolute w-80 h-80 rounded-full opacity-10" style={{ background: "radial-gradient(circle, #b44fff, transparent)", bottom: "10%", right: "5%", filter: "blur(80px)" }} />
-              <div className="absolute w-64 h-64 rounded-full opacity-5" style={{ background: "radial-gradient(circle, #ff6b35, transparent)", top: "50%", left: "50%", transform: "translate(-50%,-50%)", filter: "blur(60px)" }} />
+              <div className="absolute w-[500px] h-[500px] rounded-full opacity-8" style={{ background: "radial-gradient(circle, #00f5ff, transparent)", top: "5%", left: "-5%", filter: "blur(90px)" }} />
+              <div className="absolute w-96 h-96 rounded-full opacity-8" style={{ background: "radial-gradient(circle, #b44fff, transparent)", bottom: "5%", right: "-5%", filter: "blur(90px)" }} />
             </div>
 
             <div className="relative z-10 text-center max-w-2xl mx-auto animate-slide-up">
               <div className="mb-5 inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-oswald tracking-widest uppercase"
                 style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.2)", color: "var(--neon-cyan)" }}>
                 <div className="w-2 h-2 rounded-full animate-pulse-neon" style={{ background: "var(--neon-cyan)" }} />
-                Сезон 5 — Активен
+                Сезон 5 · Рейд «Шторм» активен
               </div>
 
-              <h1 className="font-oswald text-7xl md:text-9xl font-black tracking-widest mb-3 leading-none">
-                <span style={{ color: "white", textShadow: "0 0 40px rgba(255,255,255,0.05)" }}>SHADOW</span>
-                <br />
-                <span style={{ color: "var(--neon-cyan)", textShadow: "0 0 30px rgba(0,245,255,0.6), 0 0 80px rgba(0,245,255,0.2)" }}>WAR</span>
+              <h1 className="font-oswald text-7xl md:text-9xl font-black tracking-widest mb-3 leading-none select-none">
+                <span style={{ color: "white" }}>SHADOW</span><br />
+                <span style={{ color: "var(--neon-cyan)", textShadow: "0 0 40px rgba(0,245,255,0.5)" }}>WAR</span>
               </h1>
-
-              <p className="font-roboto text-lg mb-10" style={{ color: "rgba(255,255,255,0.45)", animationFillMode: "both" }}>
+              <p className="font-roboto text-base mb-10" style={{ color: "rgba(255,255,255,0.4)" }}>
                 Тактический шутер нового поколения
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button onClick={() => navigate("arena")} className="btn-solid-cyan px-10 py-4 rounded text-base font-bold">
-                  ⚔️ Начать бой
+              {/* Main menu buttons */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md mx-auto mb-8">
+                <button onClick={() => { navigate("play"); setPlayStep("map"); }}
+                  className="btn-solid-cyan py-5 rounded-xl text-lg font-bold col-span-1 sm:col-span-2">
+                  ⚔️ Играть
                 </button>
-                <button onClick={() => navigate("cases")} className="btn-neon-purple px-10 py-4 rounded text-base">
-                  🎁 Открыть кейс
+                <button onClick={() => navigate("shop")} className="btn-neon-cyan py-4 rounded-xl text-base">
+                  🛍️ Магазин
                 </button>
-                <button onClick={() => navigate("settings")} className="btn-neon-cyan px-10 py-4 rounded text-base">
-                  ⚙️ Настройки
+                <button onClick={() => navigate("market")} className="btn-neon-purple py-4 rounded-xl text-base">
+                  📈 Рынок
                 </button>
               </div>
 
-              <div className="mt-12 grid grid-cols-3 gap-4">
-                {[
-                  { label: "Победы", value: "76", icon: "Trophy" },
-                  { label: "Убийства", value: "287", icon: "Crosshair" },
-                  { label: "Рейтинг", value: "#9", icon: "TrendingUp" },
-                ].map(s => (
-                  <div key={s.label} className="card-dark rounded-xl p-4">
-                    <Icon name={s.icon} size={20} className="mx-auto mb-2" style={{ color: "var(--neon-cyan)", display: "block", margin: "0 auto 8px" }} />
-                    <div className="font-oswald text-2xl font-bold" style={{ color: "var(--neon-cyan)" }}>{s.value}</div>
-                    <div className="text-xs font-roboto" style={{ color: "rgba(255,255,255,0.4)" }}>{s.label}</div>
+              {/* Player card */}
+              <div className="card-dark rounded-xl p-5">
+                <div className="flex items-center gap-4 mb-3">
+                  <div className="w-12 h-12 rounded-full border-2 flex items-center justify-center"
+                    style={{ borderColor: rank.color, background: `${rank.color}12` }}>
+                    <Icon name={rank.icon} size={20} style={{ color: rank.color }} />
                   </div>
-                ))}
-              </div>
-
-              <div className="mt-5 card-dark rounded-xl p-4">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="font-rajdhani font-bold text-sm" style={{ color: rank.color }}>{rank.name}</span>
-                  {nextRank && <span className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>→ {nextRank.name}</span>}
-                  <span className="font-rajdhani text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>{playerXP} / {nextRank?.min} XP</span>
+                  <div className="flex-1 text-left">
+                    <div className="font-oswald text-base font-bold text-white">Огненный</div>
+                    <div className="font-rajdhani font-bold text-sm" style={{ color: rank.color }}>{rank.name}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-oswald font-bold" style={{ color: "var(--neon-cyan)" }}>{playerOC} OC</div>
+                    <div className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>баланс</div>
+                  </div>
                 </div>
-                <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
+                <div className="flex justify-between items-center mb-1.5">
+                  <span className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>Прогресс до «{nextRank?.name}»</span>
+                  <span className="text-xs font-rajdhani" style={{ color: "rgba(255,255,255,0.4)" }}>{playerXP} / {nextRank?.min} XP</span>
+                </div>
+                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
                   <div className="xp-bar h-full rounded-full" style={{ width: `${xpProgress}%` }} />
+                </div>
+                <div className="grid grid-cols-3 gap-3 mt-4">
+                  {[{ label: "Победы", value: "76" }, { label: "Убийства", value: "287" }, { label: "Место", value: "#9" }].map(s => (
+                    <div key={s.label} className="text-center">
+                      <div className="font-oswald text-xl font-bold" style={{ color: "var(--neon-cyan)" }}>{s.value}</div>
+                      <div className="text-[11px]" style={{ color: "rgba(255,255,255,0.35)" }}>{s.label}</div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* ========== ARENA ========== */}
-        {section === "arena" && (
-          <div className="px-4 md:px-8 py-6 max-w-6xl mx-auto">
-            <div className="mb-6 animate-slide-up">
-              <h2 className="section-title text-3xl md:text-4xl text-white mb-1">⚔️ Боевая арена</h2>
-              <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>Выбери режим и вступай в бой</p>
-            </div>
-
-            <div className="relative rounded-xl overflow-hidden mb-6">
-              <img src={ARENA_IMAGE} alt="Arena" className="w-full h-52 md:h-64 object-cover" />
-              <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(7,7,15,0.9) 0%, rgba(7,7,15,0.2) 60%, transparent 100%)" }} />
-              <div className="absolute bottom-4 left-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="w-2 h-2 rounded-full" style={{ background: "#39ff14", boxShadow: "0 0 8px #39ff14" }} />
-                  <span className="text-xs font-oswald tracking-widest" style={{ color: "#39ff14" }}>ОНЛАЙН: 1,247 игроков</span>
-                </div>
-                <div className="font-oswald text-2xl font-bold text-white tracking-wide">Карта: Теневой Город</div>
-              </div>
-              <div className="absolute top-4 right-4 px-3 py-1 rounded text-xs font-oswald tracking-widest"
-                style={{ background: "rgba(255,107,53,0.15)", border: "1px solid #ff6b35", color: "#ff6b35" }}>
-                СЕЗОН 5
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        {/* ===== PLAY: MAP + BOT SELECTION ===== */}
+        {section === "play" && (
+          <div className="px-4 md:px-8 py-6 max-w-5xl mx-auto">
+            {/* Steps */}
+            <div className="flex items-center gap-3 mb-8 animate-slide-up">
               {[
-                { name: "Командный бой", desc: "5 vs 5, классический режим", players: "10/10", time: "~15 мин", color: "var(--neon-cyan)" },
-                { name: "Захват флага", desc: "Украй флаг противника", players: "8/10", time: "~20 мин", color: "var(--neon-purple)" },
-                { name: "Смертельный матч", desc: "Каждый за себя", players: "12/16", time: "~10 мин", color: "#ff6b35" },
-              ].map((mode) => (
-                <div key={mode.name} className="card-dark rounded-xl p-5 cursor-pointer"
-                  style={{ borderColor: `${mode.color}20` }}>
-                  <div className="font-oswald text-lg font-bold mb-1" style={{ color: mode.color }}>{mode.name}</div>
-                  <div className="text-xs mb-4" style={{ color: "rgba(255,255,255,0.5)" }}>{mode.desc}</div>
-                  <div className="flex justify-between text-xs mb-4" style={{ color: "rgba(255,255,255,0.4)" }}>
-                    <span>👥 {mode.players}</span>
-                    <span>⏱ {mode.time}</span>
-                  </div>
-                  <button className="w-full py-2 rounded text-xs font-oswald tracking-widest uppercase"
-                    style={{ background: `${mode.color}12`, border: `1px solid ${mode.color}40`, color: mode.color }}>
-                    Играть
+                { id: "map", label: "1. Карта", icon: "Map" },
+                { id: "bot", label: "2. Боты", icon: "Bot" },
+                { id: "ready", label: "3. Старт", icon: "Play" },
+              ].map((step, i) => (
+                <div key={step.id} className="flex items-center gap-2">
+                  {i > 0 && <div className="w-8 h-px" style={{ background: playStep === "map" && i > 0 ? "rgba(255,255,255,0.15)" : "rgba(0,245,255,0.4)" }} />}
+                  <button onClick={() => { if (step.id === "bot" && selectedMap) setPlayStep("bot"); if (step.id === "map") setPlayStep("map"); }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded font-oswald text-xs tracking-wide uppercase transition-all"
+                    style={playStep === step.id
+                      ? { background: "rgba(0,245,255,0.12)", border: "1px solid var(--neon-cyan)", color: "var(--neon-cyan)" }
+                      : { background: "transparent", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.35)" }}>
+                    <Icon name={step.icon} size={12} />
+                    {step.label}
                   </button>
                 </div>
               ))}
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {/* STEP 1: MAP */}
+            {playStep === "map" && (
+              <div>
+                <h2 className="section-title text-2xl md:text-3xl text-white mb-5">Выбор карты</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {MAPS.map(map => (
+                    <div key={map.id}
+                      className="card-dark rounded-xl p-5 cursor-pointer transition-all"
+                      style={{
+                        borderColor: selectedMap === map.id ? map.color : `${map.color}18`,
+                        boxShadow: selectedMap === map.id ? `0 0 20px ${map.color}25` : "none",
+                        background: selectedMap === map.id ? `${map.color}08` : ""
+                      }}
+                      onClick={() => setSelectedMap(map.id)}>
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center"
+                          style={{ background: `${map.color}15`, border: `1px solid ${map.color}30` }}>
+                          <Icon name={map.icon} size={20} style={{ color: map.color }} />
+                        </div>
+                        <div>
+                          <div className="font-oswald font-bold text-sm text-white">{map.name}</div>
+                          <div className="flex gap-1 mt-0.5">
+                            {map.tags.map(t => (
+                              <span key={t} className="text-[9px] px-1.5 py-0.5 rounded font-oswald"
+                                style={{ background: `${map.color}12`, color: map.color, border: `1px solid ${map.color}25` }}>
+                                {t}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        {selectedMap === map.id && <Icon name="CheckCircle" size={18} style={{ color: map.color, marginLeft: "auto" }} />}
+                      </div>
+                      <p className="text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>{map.desc}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-6 flex justify-end">
+                  <button onClick={() => selectedMap && setPlayStep("bot")}
+                    className="btn-solid-cyan px-10 py-3 rounded-lg font-bold"
+                    style={{ opacity: selectedMap ? 1 : 0.4 }}>
+                    Далее →
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* STEP 2: BOT LEVEL */}
+            {playStep === "bot" && (
+              <div>
+                <h2 className="section-title text-2xl md:text-3xl text-white mb-5">Уровень ботов</h2>
+                <div className="space-y-3">
+                  {BOT_LEVELS.map(bot => (
+                    <div key={bot.id}
+                      className="card-dark rounded-xl p-4 cursor-pointer flex items-center gap-4"
+                      style={{
+                        borderColor: selectedBot === bot.id ? bot.color : `${bot.color}15`,
+                        background: selectedBot === bot.id ? `${bot.color}06` : ""
+                      }}
+                      onClick={() => setSelectedBot(bot.id)}>
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                        style={{ background: `${bot.color}15`, border: `1px solid ${bot.color}30` }}>
+                        <Icon name={bot.icon} size={20} style={{ color: bot.color }} />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-oswald font-bold text-sm" style={{ color: bot.color }}>{bot.name}</span>
+                          {selectedBot === bot.id && <Icon name="CheckCircle2" size={14} style={{ color: bot.color }} />}
+                        </div>
+                        <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>{bot.desc}</p>
+                      </div>
+                      {/* Stats mini bars */}
+                      <div className="hidden md:flex gap-3">
+                        {[
+                          { label: "Точность", val: bot.stats.accuracy },
+                          { label: "Скорость", val: bot.stats.speed },
+                          { label: "Агрессия", val: bot.stats.aggro },
+                        ].map(s => (
+                          <div key={s.label} className="w-16 text-center">
+                            <div className="text-[9px] mb-1" style={{ color: "rgba(255,255,255,0.3)" }}>{s.label}</div>
+                            <div className="h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+                              <div className="h-full rounded-full" style={{ width: `${s.val}%`, background: bot.color }} />
+                            </div>
+                            <div className="text-[9px] mt-0.5 font-rajdhani font-bold" style={{ color: bot.color }}>{s.val}%</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Custom bot settings */}
+                {selectedBot === "custom" && (
+                  <div className="mt-4 card-dark rounded-xl p-5">
+                    <div className="font-oswald text-sm text-white mb-4 tracking-wide uppercase">Кастомные параметры</div>
+                    {[
+                      { label: "Точность", key: "accuracy" as const },
+                      { label: "Скорость", key: "speed" as const },
+                      { label: "Агрессия", key: "aggro" as const },
+                      { label: "Здоровье (%)", key: "health" as const },
+                    ].map(s => (
+                      <div key={s.key} className="mb-4">
+                        <div className="flex justify-between mb-1.5">
+                          <span className="font-rajdhani font-bold text-sm text-white">{s.label}</span>
+                          <span className="font-rajdhani text-sm" style={{ color: "var(--neon-purple)" }}>{customBot[s.key]}%</span>
+                        </div>
+                        <input type="range" min="0" max="100" value={customBot[s.key]}
+                          onChange={e => setCustomBot(b => ({ ...b, [s.key]: +e.target.value }))}
+                          className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
+                          style={{ background: `linear-gradient(90deg, var(--neon-purple) ${customBot[s.key]}%, rgba(255,255,255,0.08) ${customBot[s.key]}%)` }} />
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="mt-6 flex justify-between">
+                  <button onClick={() => setPlayStep("map")} className="btn-neon-cyan px-6 py-3 rounded-lg">← Назад</button>
+                  <button onClick={() => selectedBot && setPlayStep("ready")}
+                    className="btn-solid-cyan px-10 py-3 rounded-lg font-bold"
+                    style={{ opacity: selectedBot ? 1 : 0.4 }}>
+                    Далее →
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* STEP 3: READY */}
+            {playStep === "ready" && (
+              <div className="text-center max-w-md mx-auto animate-slide-up">
+                <div className="w-20 h-20 rounded-full mx-auto mb-5 flex items-center justify-center animate-pulse-neon"
+                  style={{ background: "rgba(0,245,255,0.1)", border: "2px solid var(--neon-cyan)" }}>
+                  <Icon name="Play" size={36} style={{ color: "var(--neon-cyan)" }} />
+                </div>
+                <h2 className="section-title text-3xl text-white mb-2">Готово к бою!</h2>
+
+                <div className="card-dark rounded-xl p-5 mb-6 text-left">
+                  <div className="flex justify-between mb-3 pb-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                    <span className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>Карта</span>
+                    <span className="font-rajdhani font-bold text-sm text-white">{MAPS.find(m => m.id === selectedMap)?.name}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>Сложность ботов</span>
+                    <span className="font-rajdhani font-bold text-sm" style={{ color: BOT_LEVELS.find(b => b.id === selectedBot)?.color }}>
+                      {BOT_LEVELS.find(b => b.id === selectedBot)?.name}
+                    </span>
+                  </div>
+                </div>
+
+                <button className="btn-solid-cyan w-full py-5 rounded-xl text-xl font-black tracking-widest">
+                  ⚔️ В БОЙ!
+                </button>
+                <button onClick={() => setPlayStep("map")} className="mt-3 text-sm font-oswald tracking-wide uppercase"
+                  style={{ color: "rgba(255,255,255,0.3)" }}>
+                  Изменить настройки
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ===== SHOP ===== */}
+        {section === "shop" && (
+          <div className="px-4 md:px-8 py-6 max-w-5xl mx-auto">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 animate-slide-up">
+              <div>
+                <h2 className="section-title text-3xl md:text-4xl text-white mb-1">🛍️ Магазин</h2>
+                <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>Валюта: Оперативные кредиты (OC) · 100 OC = 50 руб.</p>
+              </div>
+              <div className="flex items-center gap-2 px-4 py-2 rounded-xl"
+                style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.2)" }}>
+                <div className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black"
+                  style={{ background: "var(--neon-cyan)", color: "#07070f" }}>C</div>
+                <span className="font-oswald font-bold text-lg" style={{ color: "var(--neon-cyan)" }}>{playerOC}</span>
+                <span className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>OC</span>
+                <button onClick={() => setShopTab("oc")} className="ml-2 text-xs font-oswald tracking-wide"
+                  style={{ color: "var(--neon-cyan)" }}>+ Пополнить</button>
+              </div>
+            </div>
+
+            <div className="flex gap-2 mb-6">
               {[
-                { label: "K/D Рейтинг", value: "2.14", icon: "Crosshair", color: "var(--neon-cyan)" },
-                { label: "Победы", value: "76", icon: "Trophy", color: "var(--neon-purple)" },
-                { label: "Убийства", value: "287", icon: "Zap", color: "#ff6b35" },
-                { label: "Точность", value: "47%", icon: "Target", color: "#39ff14" },
-              ].map((stat) => (
-                <div key={stat.label} className="card-dark rounded-xl p-4 text-center">
-                  <Icon name={stat.icon} size={22} style={{ color: stat.color, display: "block", margin: "0 auto 8px" }} />
-                  <div className="font-oswald text-2xl font-bold" style={{ color: stat.color }}>{stat.value}</div>
-                  <div className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>{stat.label}</div>
+                { id: "cases" as const, label: "Кейсы", icon: "Gift" },
+                { id: "raids" as const, label: "Рейды", icon: "Rocket" },
+                { id: "oc" as const, label: "Валюта OC", icon: "Coins" },
+              ].map(tab => (
+                <button key={tab.id} onClick={() => setShopTab(tab.id)}
+                  className="flex items-center gap-2 px-4 py-2 rounded font-oswald text-sm tracking-wide uppercase transition-all"
+                  style={shopTab === tab.id
+                    ? { background: "rgba(0,245,255,0.12)", border: "1px solid var(--neon-cyan)", color: "var(--neon-cyan)" }
+                    : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.45)" }}>
+                  <Icon name={tab.icon} size={14} />
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {shopTab === "cases" && (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {SHOP_CASES.map(c => (
+                  <div key={c.id} className="card-dark rounded-xl overflow-hidden cursor-pointer"
+                    style={{ borderColor: `${c.color}25` }}
+                    onClick={() => { setOpeningCase(c); setCaseResult(null); setCaseSpinning(false); navigate("cases"); }}>
+                    <div className="h-36 flex items-center justify-center"
+                      style={{ background: `radial-gradient(circle, ${c.color}12 0%, transparent 70%)` }}>
+                      <div className="animate-float">
+                        <div className="w-20 h-20 rounded-xl flex items-center justify-center"
+                          style={{ background: `${c.color}12`, border: `2px solid ${c.color}30`, boxShadow: `0 0 25px ${c.color}20` }}>
+                          <Icon name="Gift" size={40} style={{ color: c.color }} />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-3">
+                      <div className="font-oswald text-sm font-bold mb-1" style={{ color: c.color }}>{c.name}</div>
+                      <p className="text-[11px] mb-3" style={{ color: "rgba(255,255,255,0.4)" }}>{c.items}</p>
+                      <button className="w-full py-2 rounded font-oswald tracking-widest uppercase text-xs font-bold"
+                        style={{ background: `${c.color}15`, border: `1px solid ${c.color}40`, color: c.color }}>
+                        {c.price} OC
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {shopTab === "raids" && (
+              <div className="space-y-4">
+                {RAIDS.map(raid => (
+                  <div key={raid.id} className="card-dark rounded-xl p-5" style={{ borderColor: `${raid.color}25` }}>
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0"
+                          style={{ background: `${raid.color}12`, border: `2px solid ${raid.color}35` }}>
+                          <Icon name="Rocket" size={28} style={{ color: raid.color }} />
+                        </div>
+                        <div>
+                          <div className="font-oswald text-lg font-bold mb-1" style={{ color: raid.color }}>{raid.name}</div>
+                          <div className="text-xs mb-2" style={{ color: "rgba(255,255,255,0.45)" }}>{raid.reward}</div>
+                          <div className="flex items-center gap-3 text-xs">
+                            <span className="flex items-center gap-1" style={{ color: "rgba(255,255,255,0.35)" }}>
+                              <Icon name="Clock" size={12} />
+                              {raid.days} дней · осталось {raid.ends}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <button className="btn-neon-cyan px-8 py-3 rounded-lg text-sm font-bold flex-shrink-0">
+                        {raid.price} OC
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {shopTab === "oc" && (
+              <div>
+                <div className="card-dark rounded-xl p-4 mb-5" style={{ borderColor: "rgba(0,245,255,0.15)" }}>
+                  <div className="flex items-center gap-2 text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>
+                    <Icon name="Info" size={15} style={{ color: "var(--neon-cyan)" }} />
+                    Оперативные кредиты (OC) — игровая валюта Shadow War. Курс: <strong className="text-white">100 OC = 50 руб.</strong>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {OC_PACKS.map(pack => (
+                    <div key={pack.oc} className="card-dark rounded-xl p-4 text-center cursor-pointer transition-all"
+                      style={{ borderColor: pack.bonus >= 40 ? "rgba(255,215,0,0.25)" : "rgba(0,245,255,0.1)" }}>
+                      {pack.bonus > 0 && (
+                        <div className="inline-block mb-2 text-[10px] px-2 py-0.5 rounded font-oswald tracking-widest uppercase"
+                          style={{ background: "rgba(57,255,20,0.1)", color: "#39ff14", border: "1px solid rgba(57,255,20,0.25)" }}>
+                          +{pack.bonus}% бонус
+                        </div>
+                      )}
+                      <div className="font-oswald text-3xl font-black mb-1" style={{ color: pack.bonus >= 40 ? "#ffd700" : "var(--neon-cyan)" }}>
+                        {pack.oc.toLocaleString()}
+                      </div>
+                      <div className="text-xs mb-3" style={{ color: "rgba(255,255,255,0.35)" }}>OC · {pack.label}</div>
+                      <button className="w-full py-2.5 rounded font-oswald tracking-widest uppercase text-sm font-bold"
+                        style={{
+                          background: pack.bonus >= 40 ? "linear-gradient(135deg,#c8a800,#ffd700)" : "rgba(0,245,255,0.12)",
+                          color: pack.bonus >= 40 ? "#07070f" : "var(--neon-cyan)",
+                          border: pack.bonus >= 40 ? "none" : "1px solid rgba(0,245,255,0.3)"
+                        }}>
+                        {pack.price} ₽
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ===== MARKET ===== */}
+        {section === "market" && (
+          <div className="px-4 md:px-8 py-6 max-w-5xl mx-auto">
+            <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 animate-slide-up">
+              <div>
+                <h2 className="section-title text-3xl md:text-4xl text-white mb-1">📈 Рынок игроков</h2>
+                <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>Обмен и продажа предметов между игроками за OC</p>
+              </div>
+              <button className="btn-neon-cyan px-5 py-2.5 rounded-lg text-sm flex items-center gap-2">
+                <Icon name="Plus" size={14} />
+                Выставить предмет
+              </button>
+            </div>
+
+            {/* Filters */}
+            <div className="flex gap-2 mb-5 flex-wrap">
+              {["all", "skin", "knife", "agent", "charm", "sticker"].map(f => (
+                <button key={f} onClick={() => setMarketFilter(f)}
+                  className="px-3 py-1.5 rounded text-xs font-oswald tracking-widest uppercase transition-all"
+                  style={marketFilter === f
+                    ? { background: "rgba(0,245,255,0.15)", border: "1px solid var(--neon-cyan)", color: "var(--neon-cyan)" }
+                    : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.45)" }}>
+                  {f === "all" ? "Все" : typeLabel[f] || f}
+                </button>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {MARKET_LISTINGS
+                .filter(item => marketFilter === "all" || item.type === marketFilter)
+                .map(item => (
+                <div key={item.id} className={`card-dark rounded-xl p-4 flex items-center gap-4`}>
+                  <div className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: `${rarityColor[item.rarity]}10`, border: `1px solid ${rarityColor[item.rarity]}30` }}>
+                    <Icon name={item.icon} size={26} style={{ color: rarityColor[item.rarity] }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-rajdhani font-bold text-sm text-white">{item.name}</div>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-[10px] font-oswald" style={{ color: rarityColor[item.rarity] }}>{rarityLabel[item.rarity]}</span>
+                      <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>· {item.seller}</span>
+                    </div>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <div className="font-oswald font-bold text-base" style={{ color: "var(--neon-cyan)" }}>{item.price}</div>
+                    <div className="text-[10px] mb-2" style={{ color: "rgba(255,255,255,0.3)" }}>OC</div>
+                    <button className="px-3 py-1 rounded text-[10px] font-oswald tracking-wide uppercase"
+                      style={{ background: "rgba(0,245,255,0.12)", border: "1px solid rgba(0,245,255,0.3)", color: "var(--neon-cyan)" }}>
+                      Купить
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* ========== INVENTORY ========== */}
+        {/* ===== INVENTORY ===== */}
         {section === "inventory" && (
           <div className="px-4 md:px-8 py-6 max-w-6xl mx-auto">
             <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 animate-slide-up">
               <div>
                 <h2 className="section-title text-3xl md:text-4xl text-white mb-1">📦 Инвентарь</h2>
-                <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>{ITEMS.length} предметов</p>
+                <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>{INVENTORY_ITEMS.length} предметов</p>
               </div>
               <div className="flex gap-2 flex-wrap">
-                {["all", "skin", "agent", "charm"].map(f => (
+                {["all", "skin", "knife", "agent", "charm", "sticker"].map(f => (
                   <button key={f} onClick={() => setInventoryFilter(f)}
-                    className="px-4 py-1.5 rounded text-xs font-oswald tracking-widest uppercase transition-all"
+                    className="px-3 py-1.5 rounded text-xs font-oswald tracking-widest uppercase transition-all"
                     style={inventoryFilter === f
                       ? { background: "rgba(0,245,255,0.15)", border: "1px solid var(--neon-cyan)", color: "var(--neon-cyan)" }
-                      : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.5)" }}>
-                    {f === "all" ? "Все" : typeLabel[f]}
+                      : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.45)" }}>
+                    {f === "all" ? "Все" : typeLabel[f] || f}
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="mb-5 rounded-xl overflow-hidden">
-              <img src={SKINS_IMAGE} alt="Skins" className="w-full h-32 object-cover" style={{ objectPosition: "center 30%" }} />
+            <div className="mb-4 rounded-xl overflow-hidden">
+              <img src={SKINS_IMAGE} alt="Skins" className="w-full h-28 object-cover" style={{ objectPosition: "center 30%" }} />
             </div>
 
+            {/* Knives section */}
+            {(inventoryFilter === "all" || inventoryFilter === "knife") && (
+              <div className="mb-6">
+                <div className="font-oswald text-sm tracking-widest uppercase mb-3" style={{ color: "rgba(255,255,255,0.35)" }}>Ножи</div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                  {KNIVES.map(knife => (
+                    <div key={knife.id} className="card-dark rounded-xl p-3 cursor-pointer"
+                      style={{ borderColor: `${knife.color}20` }}>
+                      <div className="aspect-square rounded-lg mb-2 flex items-center justify-center"
+                        style={{ background: `${knife.color}10`, border: `1px solid ${knife.color}25` }}>
+                        <Icon name={knife.icon} size={32} style={{ color: knife.color }} />
+                      </div>
+                      <div className="font-rajdhani font-bold text-xs text-white">{knife.name}</div>
+                      <div className="flex gap-1 mt-1 flex-wrap">
+                        {knife.skins.map(s => (
+                          <span key={s} className="text-[9px] px-1 py-0.5 rounded"
+                            style={{ background: `${knife.color}10`, color: knife.color, border: `1px solid ${knife.color}20` }}>
+                            {s}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-              {ITEMS
+              {INVENTORY_ITEMS
                 .filter(item => inventoryFilter === "all" || item.type === inventoryFilter)
-                .map((item) => (
+                .map(item => (
                 <div key={item.id} className={`card-dark rounded-xl p-3 cursor-pointer rarity-${item.rarity}`}
                   style={{ borderColor: item.equipped ? "rgba(0,245,255,0.3)" : "" }}>
                   <div className="aspect-square rounded-lg mb-2 flex items-center justify-center"
-                    style={{ background: `rgba(${item.rarity === "legendary" ? "255,215,0" : item.rarity === "epic" ? "180,79,255" : item.rarity === "rare" ? "77,159,255" : "170,170,170"},0.08)` }}>
-                    <Icon name={typeIcon[item.type] || "Package"} size={28} />
+                    style={{ background: `${rarityColor[item.rarity]}08` }}>
+                    <Icon name={item.icon} size={26} />
                   </div>
                   <div className="font-rajdhani font-bold text-xs text-white leading-tight">{item.name}</div>
-                  <div className={`text-[10px] mt-1 rarity-${item.rarity}`}>{rarityLabel[item.rarity]}</div>
+                  <div className="text-[10px] mt-0.5" style={{ color: rarityColor[item.rarity] }}>{rarityLabel[item.rarity]}</div>
                   {item.equipped && (
-                    <div className="mt-1.5 text-center text-[9px] font-oswald tracking-widest px-1 py-0.5 rounded"
+                    <div className="mt-1 text-center text-[9px] font-oswald tracking-widest px-1 py-0.5 rounded"
                       style={{ background: "rgba(0,245,255,0.1)", color: "var(--neon-cyan)", border: "1px solid rgba(0,245,255,0.2)" }}>
                       АКТИВЕН
                     </div>
@@ -387,109 +805,100 @@ export default function Index() {
           </div>
         )}
 
-        {/* ========== CASES ========== */}
+        {/* ===== CASES ===== */}
         {section === "cases" && (
-          <div className="px-4 md:px-8 py-6 max-w-5xl mx-auto">
+          <div className="px-4 md:px-8 py-6 max-w-4xl mx-auto">
             <div className="mb-6 animate-slide-up">
-              <h2 className="section-title text-3xl md:text-4xl text-white mb-1">🎁 Кейсы</h2>
-              <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>Открой кейс и получи уникальные предметы</p>
+              <h2 className="section-title text-3xl md:text-4xl text-white mb-1">🎁 Открытие кейса</h2>
             </div>
 
             {!openingCase ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {CASES.map((c) => (
-                  <div key={c.id} className="card-dark rounded-xl overflow-hidden cursor-pointer"
-                    style={{ borderColor: `${c.color}25` }}
-                    onClick={() => openCase(c.id)}>
-                    <div className="h-48 flex items-center justify-center relative"
-                      style={{ background: `radial-gradient(circle at center, ${c.color}12 0%, transparent 70%)` }}>
-                      <div className="animate-float">
-                        <div className="w-24 h-24 rounded-xl flex items-center justify-center"
-                          style={{ background: `linear-gradient(135deg, ${c.color}15, ${c.color}05)`, border: `2px solid ${c.color}35`, boxShadow: `0 0 30px ${c.color}25` }}>
-                          <Icon name="Gift" size={48} style={{ color: c.color }} />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="p-4">
-                      <div className="font-oswald text-lg font-bold mb-2" style={{ color: c.color }}>{c.name}</div>
-                      <div className="flex flex-wrap gap-1 mb-4">
-                        {c.items.slice(0, 3).map(item => (
-                          <span key={item} className="text-[10px] px-2 py-0.5 rounded"
-                            style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                            {item}
-                          </span>
-                        ))}
-                        <span className="text-[10px] px-1" style={{ color: "rgba(255,255,255,0.3)" }}>+{c.items.length - 3}</span>
-                      </div>
-                      <button className="w-full py-2.5 rounded font-oswald tracking-widest uppercase text-sm font-bold"
-                        style={{ background: `${c.color}15`, border: `1px solid ${c.color}45`, color: c.color, boxShadow: `0 0 12px ${c.color}15` }}>
-                        Открыть за {c.price} ₽
-                      </button>
-                    </div>
-                  </div>
-                ))}
+              <div className="text-center py-16">
+                <p className="text-lg mb-4" style={{ color: "rgba(255,255,255,0.4)" }}>Выберите кейс в Магазине</p>
+                <button onClick={() => navigate("shop")} className="btn-solid-cyan px-8 py-3 rounded-lg font-bold">
+                  Перейти в магазин
+                </button>
               </div>
             ) : (
               <div className="text-center max-w-2xl mx-auto">
-                <button onClick={() => { setOpeningCase(null); setCaseResult(null); setCaseSpinning(false); }}
-                  className="mb-6 flex items-center gap-2 text-sm font-oswald tracking-wide uppercase transition-all"
+                <button onClick={() => { setOpeningCase(null); setCaseResult(null); setCaseSpinning(false); navigate("shop"); }}
+                  className="mb-6 flex items-center gap-2 text-sm font-oswald tracking-wide uppercase"
                   style={{ color: "rgba(255,255,255,0.4)" }}>
-                  <Icon name="ChevronLeft" size={16} /> Назад
+                  <Icon name="ChevronLeft" size={16} /> Назад в магазин
                 </button>
 
-                <div className="font-oswald text-2xl font-bold mb-8" style={{ color: CASES.find(c => c.id === openingCase)?.color }}>
-                  {CASES.find(c => c.id === openingCase)?.name}
-                </div>
+                <div className="font-oswald text-2xl font-bold mb-2" style={{ color: openingCase.color }}>{openingCase.name}</div>
+                <div className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.4)" }}>Цена: {openingCase.price} OC</div>
 
                 {/* Reel */}
-                <div className="relative overflow-hidden rounded-xl mb-8" style={{ border: "1px solid rgba(0,245,255,0.2)", height: "120px" }}>
+                <div className="relative overflow-hidden rounded-xl mb-8" style={{ border: `1px solid ${openingCase.color}30`, height: "116px" }}>
+                  {/* center marker */}
                   <div className="absolute left-1/2 top-0 bottom-0 w-0.5 z-10"
-                    style={{ background: "var(--neon-cyan)", boxShadow: "0 0 10px var(--neon-cyan)", transform: "translateX(-50%)" }} />
-                  <div className="flex gap-3 p-3 absolute"
-                    style={caseSpinning ? {
-                      transform: `translateX(-${Math.floor(Math.random() * 8 + 8) * 100}px)`,
-                      transition: "transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99)"
-                    } : {}}>
-                    {[...CASE_ITEMS_REEL, ...CASE_ITEMS_REEL].map((item, idx) => (
-                      <div key={idx} className={`flex-shrink-0 w-24 h-24 rounded-lg flex flex-col items-center justify-center rarity-${item.rarity}`}
-                        style={{ background: `rgba(${item.rarity === "legendary" ? "255,215,0" : item.rarity === "epic" ? "180,79,255" : item.rarity === "rare" ? "77,159,255" : "170,170,170"},0.08)`, border: `1px solid currentColor` }}>
-                        <Icon name="Crosshair" size={22} />
-                        <div className="text-[9px] mt-1 text-center px-1 leading-tight font-rajdhani">{item.name}</div>
+                    style={{ background: openingCase.color, boxShadow: `0 0 10px ${openingCase.color}`, transform: "translateX(-50%)" }} />
+                  <div className="absolute top-0 left-1/2 w-0 h-0 z-10"
+                    style={{ borderLeft: "8px solid transparent", borderRight: "8px solid transparent", borderTop: `8px solid ${openingCase.color}`, transform: "translateX(-50%)" }} />
+
+                  <div className="flex gap-2 p-2 absolute transition-transform"
+                    style={{
+                      transform: caseSpinning ? `translateX(-${spinOffset}px)` : "translateX(0)",
+                      transition: caseSpinning ? "transform 3.5s cubic-bezier(0.12, 0.67, 0.08, 0.99)" : "none"
+                    }}>
+                    {[...CASE_REEL, ...CASE_REEL, ...CASE_REEL, ...CASE_REEL].map((item, idx) => (
+                      <div key={idx} className="flex-shrink-0 w-24 h-24 rounded-lg flex flex-col items-center justify-center gap-1"
+                        style={{
+                          background: `${rarityColor[item.rarity]}10`,
+                          border: `1px solid ${rarityColor[item.rarity]}40`
+                        }}>
+                        <Icon name="Crosshair" size={20} style={{ color: rarityColor[item.rarity] }} />
+                        <div className="text-[9px] text-center px-1 leading-tight font-rajdhani font-bold"
+                          style={{ color: rarityColor[item.rarity] }}>{item.name}</div>
                       </div>
                     ))}
                   </div>
                 </div>
 
+                {/* Result */}
                 {caseResult ? (
                   <div className="animate-slide-up">
-                    <div className={`text-xl font-oswald mb-1 rarity-${caseResult.rarity}`}>
-                      Получено: <strong>{caseResult.name}</strong>
+                    <div className="w-20 h-20 rounded-xl mx-auto mb-3 flex items-center justify-center"
+                      style={{ background: `${rarityColor[caseResult.rarity]}12`, border: `2px solid ${rarityColor[caseResult.rarity]}`, boxShadow: `0 0 30px ${rarityColor[caseResult.rarity]}40` }}>
+                      <Icon name="Gift" size={36} style={{ color: rarityColor[caseResult.rarity] }} />
                     </div>
-                    <div className={`text-sm mb-6 rarity-${caseResult.rarity}`}>{rarityLabel[caseResult.rarity]}</div>
+                    <div className="font-oswald text-2xl font-bold mb-1" style={{ color: rarityColor[caseResult.rarity] }}>{caseResult.name}</div>
+                    <div className="text-sm mb-6 font-rajdhani font-bold" style={{ color: rarityColor[caseResult.rarity] }}>
+                      {rarityLabel[caseResult.rarity]}
+                    </div>
                     <div className="flex gap-3 justify-center">
-                      <button onClick={spinCase} className="btn-solid-cyan px-8 py-3 rounded font-bold">Ещё раз</button>
-                      <button onClick={() => { setOpeningCase(null); setCaseResult(null); }} className="btn-neon-purple px-8 py-3 rounded">Закрыть</button>
+                      <button onClick={spinCase} className="btn-solid-cyan px-8 py-3 rounded-lg font-bold">Ещё раз</button>
+                      <button onClick={() => navigate("inventory")} className="btn-neon-purple px-8 py-3 rounded-lg">В инвентарь</button>
                     </div>
                   </div>
                 ) : (
                   <button onClick={spinCase} disabled={caseSpinning}
-                    className="btn-solid-cyan px-12 py-4 rounded text-base font-bold"
+                    className="btn-solid-cyan px-12 py-4 rounded-xl text-base font-black tracking-widest"
                     style={{ opacity: caseSpinning ? 0.6 : 1 }}>
                     {caseSpinning ? "Крутится..." : "🎰 Открыть кейс"}
                   </button>
                 )}
 
-                <div className="mt-8 card-dark rounded-xl p-4 text-left">
-                  <div className="font-oswald text-xs tracking-wider uppercase mb-3" style={{ color: "rgba(255,255,255,0.4)" }}>Вероятности</div>
+                {/* Probabilities */}
+                <div className="mt-6 card-dark rounded-xl p-4 text-left">
+                  <div className="font-oswald text-xs tracking-widest uppercase mb-3" style={{ color: "rgba(255,255,255,0.35)" }}>Вероятности</div>
                   {[
-                    { rarity: "common", label: "Обычный", prob: "55%" },
-                    { rarity: "rare", label: "Редкий", prob: "30%" },
-                    { rarity: "epic", label: "Эпический", prob: "12%" },
-                    { rarity: "legendary", label: "Легендарный", prob: "3%" },
+                    { rarity: "common", prob: "55%" },
+                    { rarity: "rare", prob: "30%" },
+                    { rarity: "epic", prob: "12%" },
+                    { rarity: "legendary", prob: "2.8%" },
+                    { rarity: "ultra", prob: "0.2%" },
                   ].map(p => (
                     <div key={p.rarity} className="flex items-center justify-between mb-2">
-                      <span className={`text-sm font-rajdhani rarity-${p.rarity}`}>{p.label}</span>
-                      <span className="text-sm font-bold font-rajdhani text-white">{p.prob}</span>
+                      <span className="text-sm font-rajdhani font-bold" style={{ color: rarityColor[p.rarity] }}>{rarityLabel[p.rarity]}</span>
+                      <div className="flex items-center gap-3">
+                        <div className="w-24 h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+                          <div className="h-full rounded-full" style={{ width: p.prob, background: rarityColor[p.rarity] }} />
+                        </div>
+                        <span className="text-sm font-bold font-rajdhani text-white w-10 text-right">{p.prob}</span>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -498,96 +907,298 @@ export default function Index() {
           </div>
         )}
 
-        {/* ========== RATING ========== */}
+        {/* ===== RATING ===== */}
         {section === "rating" && (
           <div className="px-4 md:px-8 py-6 max-w-4xl mx-auto">
             <div className="mb-6 animate-slide-up">
               <h2 className="section-title text-3xl md:text-4xl text-white mb-1">🏆 Рейтинг</h2>
-              <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>Топ лучших бойцов Shadow War</p>
+              <p className="text-sm mb-4" style={{ color: "rgba(255,255,255,0.4)" }}>Топ бойцов Shadow War</p>
+              <div className="flex gap-2">
+                {[{ id: "table", label: "Таблица" }, { id: "ranks", label: "Ранги" }].map(t => (
+                  <button key={t.id} onClick={() => setRatingTab(t.id as "table" | "ranks")}
+                    className="px-4 py-1.5 rounded font-oswald text-xs tracking-wide uppercase transition-all"
+                    style={ratingTab === t.id
+                      ? { background: "rgba(0,245,255,0.12)", border: "1px solid var(--neon-cyan)", color: "var(--neon-cyan)" }
+                      : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.45)" }}>
+                    {t.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {/* Podium */}
-            <div className="grid grid-cols-3 gap-3 mb-6">
-              {[PLAYERS[1], PLAYERS[0], PLAYERS[2]].map((player, i) => {
-                const podiumPos = [2, 1, 3][i];
-                const heights = ["h-24", "h-32", "h-20"][i];
-                const colors = ["#C0C0C0", "#FFD700", "#CD7F32"][i];
-                return (
-                  <div key={player.name} className="flex flex-col items-center">
-                    <div className="font-rajdhani font-bold text-xs mb-1 text-center truncate w-full" style={{ color: "rgba(255,255,255,0.6)" }}>{player.name}</div>
-                    <div className={`w-full ${heights} rounded-t-lg flex flex-col items-center justify-center`}
-                      style={{ background: `linear-gradient(180deg, ${colors}18, ${colors}06)`, border: `1px solid ${colors}35` }}>
-                      <div className="font-oswald text-3xl font-black" style={{ color: colors }}>{podiumPos}</div>
-                      <div className="text-xs font-rajdhani" style={{ color: `${colors}90` }}>{player.xp} XP</div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            {ratingTab === "table" && (
+              <>
+                <div className="grid grid-cols-3 gap-3 mb-6">
+                  {[PLAYERS[1], PLAYERS[0], PLAYERS[2]].map((player, i) => {
+                    const podiumPos = [2, 1, 3][i];
+                    const heights = ["h-24", "h-32", "h-20"][i];
+                    const colors = ["#C0C0C0", "#FFD700", "#CD7F32"][i];
+                    return (
+                      <div key={player.name} className="flex flex-col items-center">
+                        <div className="font-rajdhani font-bold text-xs mb-1 text-center truncate w-full px-1"
+                          style={{ color: "rgba(255,255,255,0.6)" }}>{player.name}</div>
+                        <div className={`w-full ${heights} rounded-t-lg flex flex-col items-center justify-center`}
+                          style={{ background: `linear-gradient(180deg, ${colors}18, ${colors}06)`, border: `1px solid ${colors}30` }}>
+                          <div className="font-oswald text-3xl font-black" style={{ color: colors }}>{podiumPos}</div>
+                          <div className="text-xs font-rajdhani" style={{ color: `${colors}80` }}>{player.xp} XP</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="space-y-2">
+                  {PLAYERS.map((player, i) => {
+                    const r = getRank(player.xp);
+                    const isMe = player.name === "Огненный";
+                    return (
+                      <div key={player.name} className="card-dark rounded-xl px-4 py-3 flex items-center gap-3"
+                        style={{ borderColor: isMe ? "rgba(0,245,255,0.3)" : "", background: isMe ? "rgba(0,245,255,0.03)" : "" }}>
+                        <div className="font-oswald text-base font-black w-6 text-center"
+                          style={{ color: i < 3 ? ["#FFD700","#C0C0C0","#CD7F32"][i] : "rgba(255,255,255,0.2)" }}>
+                          {i + 1}
+                        </div>
+                        <div className="text-lg w-6">{player.country}</div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-rajdhani font-bold text-sm truncate" style={{ color: isMe ? "var(--neon-cyan)" : "white" }}>{player.name}</span>
+                            {isMe && <span className="text-[9px] px-1.5 py-0.5 rounded font-oswald flex-shrink-0" style={{ background: "rgba(0,245,255,0.1)", color: "var(--neon-cyan)", border: "1px solid rgba(0,245,255,0.2)" }}>ВЫ</span>}
+                          </div>
+                          <div className="text-xs font-rajdhani" style={{ color: r.color }}>{r.name}</div>
+                        </div>
+                        <div className="hidden sm:flex gap-4">
+                          <div className="text-center">
+                            <div className="font-rajdhani font-bold text-sm" style={{ color: "var(--neon-cyan)" }}>{player.kills}</div>
+                            <div className="text-[9px]" style={{ color: "rgba(255,255,255,0.3)" }}>убийств</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="font-rajdhani font-bold text-sm" style={{ color: "var(--neon-purple)" }}>{player.wins}</div>
+                            <div className="text-[9px]" style={{ color: "rgba(255,255,255,0.3)" }}>побед</div>
+                          </div>
+                        </div>
+                        <div className="font-oswald font-bold text-sm" style={{ color: r.color }}>{player.xp}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
 
-            <div className="space-y-2">
-              {PLAYERS.map((player, i) => {
-                const r = getRank(player.xp);
-                const isMe = player.name === "Огненный";
-                return (
-                  <div key={player.name} className="card-dark rounded-xl px-4 py-3 flex items-center gap-3"
-                    style={{
-                      borderColor: isMe ? "rgba(0,245,255,0.3)" : "",
-                      background: isMe ? "rgba(0,245,255,0.03)" : ""
-                    }}>
-                    <div className="font-oswald text-base font-black w-7 text-center"
-                      style={{ color: i < 3 ? ["#FFD700","#C0C0C0","#CD7F32"][i] : "rgba(255,255,255,0.25)" }}>
-                      {i + 1}
-                    </div>
-                    <div className="text-xl w-7">{player.country}</div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-rajdhani font-bold text-sm truncate" style={{ color: isMe ? "var(--neon-cyan)" : "white" }}>{player.name}</span>
-                        {isMe && <span className="text-[9px] px-1.5 py-0.5 rounded font-oswald tracking-wider flex-shrink-0" style={{ background: "rgba(0,245,255,0.1)", color: "var(--neon-cyan)", border: "1px solid rgba(0,245,255,0.2)" }}>ВЫ</span>}
-                      </div>
-                      <div className="text-xs font-rajdhani" style={{ color: r.color }}>{r.name}</div>
-                    </div>
-                    <div className="hidden sm:flex gap-4 text-center">
-                      <div>
-                        <div className="font-rajdhani font-bold text-sm" style={{ color: "var(--neon-cyan)" }}>{player.kills}</div>
-                        <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>убийств</div>
-                      </div>
-                      <div>
-                        <div className="font-rajdhani font-bold text-sm" style={{ color: "var(--neon-purple)" }}>{player.wins}</div>
-                        <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>побед</div>
-                      </div>
-                    </div>
-                    <div className="font-oswald font-bold text-sm" style={{ color: r.color }}>{player.xp}</div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="mt-6 card-dark rounded-xl p-4">
-              <div className="font-oswald text-xs tracking-wider uppercase mb-3" style={{ color: "rgba(255,255,255,0.4)" }}>Система рангов</div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            {ratingTab === "ranks" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {RANKS.map(r => (
-                  <div key={r.name} className="flex items-center gap-2 p-2 rounded"
-                    style={{ background: `${r.color}08`, border: `1px solid ${r.color}18` }}>
-                    <Icon name={r.icon} size={15} style={{ color: r.color }} />
-                    <div>
-                      <div className="font-rajdhani font-bold text-sm" style={{ color: r.color }}>{r.name}</div>
-                      <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>{r.min}–{r.max === 99999 ? "∞" : r.max} XP</div>
+                  <div key={r.name} className="card-dark rounded-xl p-4 flex items-center gap-4"
+                    style={{ borderColor: `${r.color}20` }}>
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
+                      style={{ background: `${r.color}12`, border: `2px solid ${r.color}35` }}>
+                      <Icon name={r.icon} size={22} style={{ color: r.color }} />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-oswald font-bold text-lg" style={{ color: r.color }}>{r.name}</div>
+                      <div className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>{r.min.toLocaleString()} – {r.max === 99999 ? "∞" : r.max.toLocaleString()} XP</div>
+                    </div>
+                    {playerXP >= r.min && playerXP <= r.max && (
+                      <span className="text-[10px] px-2 py-1 rounded font-oswald tracking-wide"
+                        style={{ background: `${r.color}15`, color: r.color, border: `1px solid ${r.color}30` }}>
+                        Ваш ранг
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ===== COLLECTION ===== */}
+        {section === "collection" && (
+          <div className="px-4 md:px-8 py-6 max-w-5xl mx-auto">
+            <div className="mb-6 animate-slide-up">
+              <h2 className="section-title text-3xl md:text-4xl text-white mb-1">🗂️ Коллекции</h2>
+              <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>Собирайте полные коллекции и получайте награды</p>
+            </div>
+
+            <div className="flex gap-2 mb-6 flex-wrap">
+              {[
+                { id: "weapons" as const, label: "Оружие", icon: "Crosshair" },
+                { id: "agents" as const, label: "Агенты", icon: "Users" },
+                { id: "knives" as const, label: "Ножи", icon: "Scissors" },
+                { id: "stickers" as const, label: "Наклейки", icon: "Tag" },
+                { id: "charms" as const, label: "Брелоки", icon: "KeyRound" },
+              ].map(tab => (
+                <button key={tab.id} onClick={() => setCollectionTab(tab.id)}
+                  className="flex items-center gap-2 px-4 py-2 rounded font-oswald text-sm tracking-wide uppercase transition-all"
+                  style={collectionTab === tab.id
+                    ? { background: "rgba(0,245,255,0.12)", border: "1px solid var(--neon-cyan)", color: "var(--neon-cyan)" }
+                    : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.45)" }}>
+                  <Icon name={tab.icon} size={13} />
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {collectionTab === "weapons" && (
+              <div>
+                <div className="mb-4 card-dark rounded-xl p-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-oswald text-sm tracking-wide uppercase text-white">Прогресс коллекции</span>
+                    <span className="font-rajdhani font-bold" style={{ color: "var(--neon-cyan)" }}>5 / 30</span>
+                  </div>
+                  <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
+                    <div className="xp-bar h-full rounded-full" style={{ width: "17%" }} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {[
+                    { cat: "Пистолеты", count: 6, owned: 1, color: "#4d9fff" },
+                    { cat: "Пистолеты-пулемёты", count: 5, owned: 0, color: "#b44fff" },
+                    { cat: "Дробовики", count: 4, owned: 1, color: "#ff6b35" },
+                    { cat: "Штурмовые винтовки", count: 6, owned: 2, color: "#00f5ff" },
+                    { cat: "Снайперские", count: 4, owned: 1, color: "#ffd700" },
+                    { cat: "Пулемёты", count: 3, owned: 0, color: "#39ff14" },
+                    { cat: "Гранаты", count: 2, owned: 0, color: "#aaaaaa" },
+                  ].map(cat => (
+                    <div key={cat.cat} className="card-dark rounded-xl p-4">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="font-rajdhani font-bold text-sm text-white">{cat.cat}</div>
+                        <span className="font-rajdhani font-bold text-sm" style={{ color: cat.color }}>{cat.owned}/{cat.count}</span>
+                      </div>
+                      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
+                        <div className="h-full rounded-full" style={{ width: `${(cat.owned / cat.count) * 100}%`, background: cat.color }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {collectionTab === "agents" && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  { name: "Призрак", rarity: "epic", owned: true },
+                  { name: "Командир Х", rarity: "rare", owned: true },
+                  { name: "Тень", rarity: "legendary", owned: false },
+                  { name: "Кибер-Страж", rarity: "epic", owned: false },
+                  { name: "Агент Буря", rarity: "rare", owned: false },
+                  { name: "Феникс", rarity: "legendary", owned: false },
+                  { name: "Шторм", rarity: "common", owned: true },
+                  { name: "Охотник", rarity: "rare", owned: false },
+                ].map(agent => (
+                  <div key={agent.name} className="card-dark rounded-xl p-4 text-center"
+                    style={{ opacity: agent.owned ? 1 : 0.35 }}>
+                    <div className="w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center"
+                      style={{ background: `${rarityColor[agent.rarity]}12`, border: `2px solid ${rarityColor[agent.rarity]}35` }}>
+                      <Icon name="User" size={28} style={{ color: rarityColor[agent.rarity] }} />
+                    </div>
+                    <div className="font-rajdhani font-bold text-sm text-white">{agent.name}</div>
+                    <div className="text-[10px] mt-0.5" style={{ color: rarityColor[agent.rarity] }}>{rarityLabel[agent.rarity]}</div>
+                    {!agent.owned && <div className="text-[10px] mt-1" style={{ color: "rgba(255,255,255,0.25)" }}>Не получен</div>}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {collectionTab === "knives" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {KNIVES.map(knife => (
+                  <div key={knife.id} className="card-dark rounded-xl p-5">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center"
+                        style={{ background: `${knife.color}12`, border: `2px solid ${knife.color}30` }}>
+                        <Icon name={knife.icon} size={24} style={{ color: knife.color }} />
+                      </div>
+                      <div className="font-oswald font-bold text-lg" style={{ color: knife.color }}>{knife.name}</div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      {knife.skins.map((skin, si) => (
+                        <div key={skin} className="flex items-center gap-2 p-2.5 rounded-lg"
+                          style={{ background: si === 0 ? `${knife.color}10` : "rgba(255,255,255,0.03)", border: `1px solid ${si === 0 ? knife.color + "30" : "rgba(255,255,255,0.06)"}` }}>
+                          <Icon name={knife.icon} size={16} style={{ color: si === 0 ? knife.color : "rgba(255,255,255,0.3)" }} />
+                          <span className="text-xs font-rajdhani font-bold" style={{ color: si === 0 ? knife.color : "rgba(255,255,255,0.4)" }}>
+                            {skin}
+                          </span>
+                          {si === 0 && <Icon name="Check" size={12} style={{ color: knife.color, marginLeft: "auto" }} />}
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
+            )}
+
+            {collectionTab === "stickers" && (
+              <div>
+                <div className="card-dark rounded-xl p-4 mb-5 flex items-start gap-3">
+                  <Icon name="Info" size={16} style={{ color: "var(--neon-cyan)", flexShrink: 0, marginTop: "2px" }} />
+                  <p className="text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>
+                    Наклейки наносятся на оружие (до 3 на ствол). Имеют эффекты износа: царапины, потёртости. Более 100 вариантов.
+                  </p>
+                </div>
+                <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
+                  {Array.from({ length: 10 }, (_, i) => ({
+                    name: ["Феникс", "Череп", "Волк", "Дракон", "Орёл", "Пламя", "Лёд", "Гром", "Тень", "Туман"][i],
+                    rarity: (["common","rare","epic","rare","common","legendary","rare","epic","common","rare"] as const)[i],
+                    owned: i < 2,
+                  })).map(s => (
+                    <div key={s.name} className="card-dark rounded-xl p-3 text-center"
+                      style={{ opacity: s.owned ? 1 : 0.35 }}>
+                      <div className="w-12 h-12 rounded-lg mx-auto mb-2 flex items-center justify-center"
+                        style={{ background: `${rarityColor[s.rarity]}10`, border: `1px solid ${rarityColor[s.rarity]}25` }}>
+                        <Icon name="Tag" size={22} style={{ color: rarityColor[s.rarity] }} />
+                      </div>
+                      <div className="text-xs font-rajdhani font-bold text-white">{s.name}</div>
+                      <div className="text-[9px] mt-0.5" style={{ color: rarityColor[s.rarity] }}>{rarityLabel[s.rarity]}</div>
+                    </div>
+                  ))}
+                  <div className="card-dark rounded-xl p-3 flex items-center justify-center cursor-pointer"
+                    style={{ border: "1px dashed rgba(255,255,255,0.1)", opacity: 0.5 }}>
+                    <div className="text-center">
+                      <div className="font-oswald text-2xl font-bold" style={{ color: "rgba(255,255,255,0.2)" }}>+90</div>
+                      <div className="text-xs" style={{ color: "rgba(255,255,255,0.2)" }}>ещё</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {collectionTab === "charms" && (
+              <div>
+                <div className="card-dark rounded-xl p-4 mb-5 flex items-start gap-3">
+                  <Icon name="Info" size={16} style={{ color: "var(--neon-cyan)", flexShrink: 0, marginTop: "2px" }} />
+                  <p className="text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>
+                    Брелоки отображаются на оружии, анимируются при движении. Более 50 вариантов. Редкость: от обычной до ультраредкой.
+                  </p>
+                </div>
+                <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
+                  {[
+                    { name: "Дракон", rarity: "epic", owned: true },
+                    { name: "Кибер-Кот", rarity: "rare", owned: true },
+                    { name: "Skull Key", rarity: "common", owned: true },
+                    { name: "Пират", rarity: "common", owned: false },
+                    { name: "Лиса", rarity: "rare", owned: false },
+                    { name: "Демон", rarity: "legendary", owned: false },
+                  ].map(c => (
+                    <div key={c.name} className="card-dark rounded-xl p-3 text-center"
+                      style={{ opacity: c.owned ? 1 : 0.35 }}>
+                      <div className="w-12 h-12 rounded-lg mx-auto mb-2 flex items-center justify-center"
+                        style={{ background: `${rarityColor[c.rarity]}10`, border: `1px solid ${rarityColor[c.rarity]}25` }}>
+                        <Icon name="KeyRound" size={22} style={{ color: rarityColor[c.rarity] }} />
+                      </div>
+                      <div className="text-xs font-rajdhani font-bold text-white">{c.name}</div>
+                      <div className="text-[9px] mt-0.5" style={{ color: rarityColor[c.rarity] }}>{rarityLabel[c.rarity]}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
-        {/* ========== SETTINGS ========== */}
+        {/* ===== SETTINGS ===== */}
         {section === "settings" && (
           <div className="px-4 md:px-8 py-6 max-w-3xl mx-auto">
             <div className="mb-6 animate-slide-up">
               <h2 className="section-title text-3xl md:text-4xl text-white mb-1">⚙️ Настройки</h2>
             </div>
-
             <div className="flex gap-2 mb-6 flex-wrap">
               {[
                 { id: "graphics", label: "Графика", icon: "Monitor" },
@@ -605,21 +1216,20 @@ export default function Index() {
                 </button>
               ))}
             </div>
-
             <div className="card-dark rounded-xl p-6">
               {settingsTab === "graphics" && (
                 <div className="space-y-6">
                   {[
-                    { label: "Качество графики", options: ["Низкое", "Среднее", "Высокое", "Ультра"], current: graphics.quality, onChange: (v: string) => setGraphics(g => ({...g, quality: v})) },
-                    { label: "Ограничение FPS", options: ["30", "60", "120", "Без лимита"], current: graphics.fps, onChange: (v: string) => setGraphics(g => ({...g, fps: v})) },
-                  ].map(setting => (
-                    <div key={setting.label}>
-                      <div className="font-rajdhani font-bold text-sm mb-3 text-white">{setting.label}</div>
+                    { label: "Качество графики", options: ["Низкое","Среднее","Высокое","Ультра"], current: graphics.quality, onChange: (v: string) => setGraphics(g => ({...g, quality: v})) },
+                    { label: "Ограничение FPS", options: ["30","60","120","Без лимита"], current: graphics.fps, onChange: (v: string) => setGraphics(g => ({...g, fps: v})) },
+                  ].map(s => (
+                    <div key={s.label}>
+                      <div className="font-rajdhani font-bold text-sm mb-2 text-white">{s.label}</div>
                       <div className="flex gap-2 flex-wrap">
-                        {setting.options.map(opt => (
-                          <button key={opt} onClick={() => setting.onChange(opt)}
+                        {s.options.map(opt => (
+                          <button key={opt} onClick={() => s.onChange(opt)}
                             className="px-3 py-1.5 rounded text-xs font-oswald tracking-wide transition-all"
-                            style={setting.current === opt
+                            style={s.current === opt
                               ? { background: "rgba(0,245,255,0.15)", border: "1px solid var(--neon-cyan)", color: "var(--neon-cyan)" }
                               : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.5)" }}>
                             {opt}
@@ -628,23 +1238,19 @@ export default function Index() {
                       </div>
                     </div>
                   ))}
-                  {[
-                    { label: "Тени", key: "shadows" as const },
-                    { label: "Размытие движения", key: "blur" as const },
-                  ].map(toggle => (
-                    <div key={toggle.label} className="flex items-center justify-between">
-                      <span className="font-rajdhani font-bold text-sm text-white">{toggle.label}</span>
-                      <button onClick={() => setGraphics(g => ({...g, [toggle.key]: !g[toggle.key]}))}
+                  {[{ label: "Тени", key: "shadows" as const }, { label: "Размытие движения", key: "blur" as const }].map(t => (
+                    <div key={t.label} className="flex items-center justify-between">
+                      <span className="font-rajdhani font-bold text-sm text-white">{t.label}</span>
+                      <button onClick={() => setGraphics(g => ({...g, [t.key]: !g[t.key]}))}
                         className="relative w-12 h-6 rounded-full transition-all"
-                        style={{ background: graphics[toggle.key] ? "var(--neon-cyan)" : "rgba(255,255,255,0.1)" }}>
+                        style={{ background: graphics[t.key] ? "var(--neon-cyan)" : "rgba(255,255,255,0.1)" }}>
                         <div className="absolute top-1 w-4 h-4 rounded-full bg-white transition-all"
-                          style={{ left: graphics[toggle.key] ? "1.5rem" : "0.25rem" }} />
+                          style={{ left: graphics[t.key] ? "1.5rem" : "0.25rem" }} />
                       </button>
                     </div>
                   ))}
                 </div>
               )}
-
               {settingsTab === "audio" && (
                 <div className="space-y-6">
                   {[
@@ -654,7 +1260,7 @@ export default function Index() {
                     { label: "Голосовой чат", key: "voice" as const },
                   ].map(s => (
                     <div key={s.label}>
-                      <div className="flex justify-between mb-2">
+                      <div className="flex justify-between mb-1.5">
                         <span className="font-rajdhani font-bold text-sm text-white">{s.label}</span>
                         <span className="font-rajdhani text-sm" style={{ color: "var(--neon-cyan)" }}>{audio[s.key]}%</span>
                       </div>
@@ -664,22 +1270,26 @@ export default function Index() {
                         style={{ background: `linear-gradient(90deg, var(--neon-cyan) ${audio[s.key]}%, rgba(255,255,255,0.1) ${audio[s.key]}%)` }} />
                     </div>
                   ))}
+                  <div className="card-dark rounded-xl p-4" style={{ borderColor: "rgba(57,255,20,0.2)" }}>
+                    <div className="font-oswald text-sm text-white mb-1 tracking-wide uppercase">Звуковые системы</div>
+                    <div className="space-y-1 text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
+                      <div>• Уникальные звуки для каждого типа оружия</div>
+                      <div>• Голосовые реплики ботов и агентов на русском</div>
+                      <div>• Динамическая музыка: боевая / меню / финальный аккорд</div>
+                    </div>
+                  </div>
                 </div>
               )}
-
               {settingsTab === "controls" && (
-                <div className="space-y-0">
+                <div>
                   {[
-                    { action: "Вперёд", key: "W" },
-                    { action: "Назад", key: "S" },
-                    { action: "Влево", key: "A" },
-                    { action: "Вправо", key: "D" },
-                    { action: "Прицел", key: "ПКМ" },
-                    { action: "Стрелять", key: "ЛКМ" },
-                    { action: "Перезарядка", key: "R" },
-                    { action: "Присесть", key: "C" },
+                    { action: "Вперёд", key: "W" }, { action: "Назад", key: "S" },
+                    { action: "Влево", key: "A" }, { action: "Вправо", key: "D" },
+                    { action: "Прицел", key: "ПКМ" }, { action: "Стрелять", key: "ЛКМ" },
+                    { action: "Перезарядка", key: "R" }, { action: "Присесть", key: "C" },
+                    { action: "Нож", key: "3" }, { action: "Граната", key: "G" },
                   ].map(bind => (
-                    <div key={bind.action} className="flex items-center justify-between py-3"
+                    <div key={bind.action} className="flex items-center justify-between py-2.5"
                       style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
                       <span className="font-rajdhani text-sm" style={{ color: "rgba(255,255,255,0.6)" }}>{bind.action}</span>
                       <kbd className="px-3 py-1 rounded text-xs font-oswald font-bold"
@@ -690,7 +1300,6 @@ export default function Index() {
                   ))}
                 </div>
               )}
-
               {settingsTab === "support" && (
                 <div className="space-y-4">
                   <p className="text-sm mb-4" style={{ color: "rgba(255,255,255,0.5)" }}>Обратитесь к нашей команде поддержки по любым вопросам</p>
@@ -712,51 +1321,6 @@ export default function Index() {
                   </div>
                 </div>
               )}
-            </div>
-          </div>
-        )}
-
-        {/* ========== FAQ ========== */}
-        {section === "faq" && (
-          <div className="px-4 md:px-8 py-6 max-w-3xl mx-auto">
-            <div className="mb-6 animate-slide-up">
-              <h2 className="section-title text-3xl md:text-4xl text-white mb-1">❓ Помощь</h2>
-              <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>Часто задаваемые вопросы</p>
-            </div>
-
-            <div className="space-y-3">
-              {[
-                { q: "Как повысить свой ранг?", a: "Побеждайте в матчах и набирайте XP. Каждая победа даёт 50–100 XP, каждое убийство — 10 XP. Выполняйте ежедневные задания для дополнительных очков." },
-                { q: "Что такое кейсы и как их открыть?", a: "Кейсы содержат случайные предметы: скины оружия, агентов и брелоки. Купите кейс в разделе 'Кейсы', нажмите 'Открыть' и крутите рулетку. Вероятности указаны для каждого кейса." },
-                { q: "Можно ли торговать предметами?", a: "Да, торговля между игроками доступна через раздел Инвентарь → Торговля. Предметы редкости 'Обычный' и 'Редкий' можно продать на маркете." },
-                { q: "Как работает система рейтинга?", a: "Рейтинг обновляется в конце каждого сезона (каждые 3 месяца). За победы вы получаете рейтинговые очки, за поражения теряете. Топ-100 получает эксклюзивные награды." },
-                { q: "Почему меня забанили?", a: "Баны выдаются автоматически при обнаружении читов, токсичного поведения или нарушения правил. Обратитесь в поддержку для апелляции с указанием вашего никнейма." },
-                { q: "Как восстановить аккаунт?", a: "Если вы забыли пароль — используйте кнопку 'Восстановить пароль' на странице входа. При потере доступа к email обратитесь в поддержку через чат." },
-                { q: "Что происходит в конце сезона?", a: "В конце сезона все игроки получают награды по своему финальному рангу. После сброса рейтинга вы начинаете новый сезон с частично сохранённым рангом." },
-              ].map((item, i) => (
-                <div key={i} className="card-dark rounded-xl overflow-hidden">
-                  <button onClick={() => setFaqOpen(faqOpen === i ? null : i)}
-                    className="w-full flex items-center justify-between p-4 text-left">
-                    <span className="font-rajdhani font-bold text-sm text-white pr-4">{item.q}</span>
-                    <Icon name={faqOpen === i ? "ChevronUp" : "ChevronDown"} size={16}
-                      style={{ color: "var(--neon-cyan)", flexShrink: 0 }} />
-                  </button>
-                  {faqOpen === i && (
-                    <div className="px-4 pb-4 animate-slide-up">
-                      <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>{item.a}</p>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-6 card-dark rounded-xl p-5 text-center">
-              <div className="font-oswald text-lg font-bold text-white mb-1">Не нашли ответ?</div>
-              <p className="text-sm mb-4" style={{ color: "rgba(255,255,255,0.4)" }}>Наша команда поддержки готова помочь 24/7</p>
-              <button onClick={() => { navigate("settings"); setSettingsTab("support"); }}
-                className="btn-solid-cyan px-8 py-3 rounded font-bold">
-                Написать в поддержку
-              </button>
             </div>
           </div>
         )}
